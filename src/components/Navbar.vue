@@ -185,7 +185,7 @@ nav {
     right: 10vw;
     left: 10vw;
   }
-  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
 
   background-color: var(--color-navbar-bg);
   z-index: 100;
