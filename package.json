@@ -94,7 +94,7 @@
     "prettier": "2.5.1",
     "sass": "^1.26.11",
     "sass-loader": "^10.0.2",
-    "vue-cli-plugin-electron-builder": "~2.1.1",
+
     "vue-template-compiler": "^2.6.11"
   },
   "resolutions": {
