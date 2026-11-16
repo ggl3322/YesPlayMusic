@@ -1009,8 +1009,8 @@ export default {
     flex-direction: column;
     padding-left: 78px;
     max-width: 460px;
-    overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     transition: 0.5s;
     scrollbar-width: none; // firefox
 
@@ -1054,7 +1054,7 @@ export default {
     .line#line-end {
       flex-shrink: 0;
       height: 50vh;
-    height: 50dvh;
+      height: 50dvh;
       margin: 0;
       padding: 0;
     }
@@ -1083,7 +1083,7 @@ export default {
 
   .lyrics-container .line:first-child {
     margin-top: 50vh;
-  margin-top: 50dvh;
+    margin-top: 50dvh;
   }
 }
 
