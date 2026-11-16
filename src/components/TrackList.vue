@@ -67,7 +67,8 @@
         :track-prop="track"
         :track-no="index + 1"
         :highlight-playing-track="highlightPlayingTrack"
-        @dblclick.native="onTrackDblClick(track)" @click.native="playOnTouch($event, track)"
+        @dblclick.native="onTrackDblClick(track)"
+        @click.native="playOnTouch($event, track)"
         @click.right.native="openMenu($event, track, index)"
       />
     </div>
@@ -151,7 +152,8 @@ export default {
         al: { picUrl: '' },
       },
       rightClickedTrackIndex: -1,
-      listStyles: {}, lastTouchPlayAt: 0,
+      listStyles: {},
+      lastTouchPlayAt: 0,
     };
   },
   computed: {
@@ -196,7 +198,30 @@ export default {
       };
       this.rightClickedTrackIndex = -1;
     },
-    isTouchDevice() { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }, playOnTouch(e, track) { if (!this.isTouchDevice()) return; if (e && e.target && e.target.closest && e.target.closest('a, img, button, .artist')) return; this.lastTouchPlayAt = Date.now(); this.playThisList(track.id || track.songId); }, onTrackDblClick(track) { if (this.isTouchDevice() && Date.now() - this.lastTouchPlayAt < 800) return; this.playThisList(track.id || track.songId); }, playThisList(trackID) {
+     isTouchDevice() {
+       return !!(
+        window.matchMedia &&
+        window.matchMedia('(pointer: coarse)').matches
+      );
+    },
+    playOnTouch(e, track) {
+      if (!this.isTouchDevice()) return;
+      if (
+        e &&
+        e.target &&
+        e.target.closest &&
+        e.target.closest('a, img, button, .artist')
+      )
+        return;
+      this.lastTouchPlayAt = Date.now();
+      this.playThisList(track.id || track.songId);
+    },
+    onTrackDblClick(track) {
+      if (this.isTouchDevice() && Date.now() - this.lastTouchPlayAt < 800)
+        return;
+      this.playThisList(track.id || track.songId);
+    },
+    playThisList(trackID) {
       if (this.dbclickTrackFunc === 'default') {
         this.playThisListDefault(trackID);
       } else if (this.dbclickTrackFunc === 'none') {
