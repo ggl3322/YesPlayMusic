@@ -121,8 +121,8 @@ main {
   bottom: 0;
   right: 0;
   left: 0;
-  overflow: auto; 
-  -webkit-overflow-scrolling: touch; 
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: 64px 10vw 96px 10vw;
   box-sizing: border-box;
