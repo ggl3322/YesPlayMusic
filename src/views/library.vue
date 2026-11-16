@@ -279,7 +279,6 @@ export default {
         this.$store.dispatch('fetchLikedSongsWithDetails').then(() => {
           NProgress.done();
           this.show = true;
-
         });
       }
       this.$store.dispatch('fetchLikedSongs');
@@ -439,7 +438,6 @@ h1 {
       }
     }
   }
-
 }
 
 .section-two {
