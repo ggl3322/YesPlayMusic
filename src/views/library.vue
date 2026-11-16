@@ -9,7 +9,6 @@
     </h1>
     <div class="section-one">
       <div class="liked-songs" @click="goToLikedSongsList">
-        
         <div class="bottom">
           <div class="titles">
             <div class="title">{{ $t('library.likedSongs') }}</div>
@@ -206,7 +205,7 @@
 
 <script>
 import { mapActions, mapMutations, mapState } from 'vuex';
-import { randomNum, dailyTask } from '@/utils/common';
+import { dailyTask } from '@/utils/common';
 import { isAccountLoggedIn } from '@/utils/auth';
 import { uploadSong } from '@/api/user';
 
@@ -219,8 +218,6 @@ import CoverRow from '@/components/CoverRow.vue';
 import SvgIcon from '@/components/SvgIcon.vue';
 import MvRow from '@/components/MvRow.vue';
 
-
-
 export default {
   name: 'Library',
   components: { SvgIcon, CoverRow, TrackList, MvRow, ContextMenu },
@@ -228,7 +225,7 @@ export default {
     return {
       show: false,
       likedSongs: [],
-      
+
       currentTab: 'playlists',
       playHistoryMode: 'week',
     };
@@ -278,12 +275,11 @@ export default {
         NProgress.done();
         this.show = true;
         this.$store.dispatch('fetchLikedSongsWithDetails');
-        
       } else {
         this.$store.dispatch('fetchLikedSongsWithDetails').then(() => {
           NProgress.done();
           this.show = true;
-          
+
         });
       }
       this.$store.dispatch('fetchLikedSongs');
@@ -444,8 +440,6 @@ h1 {
     }
   }
 
-  
-  
 }
 
 .section-two {
