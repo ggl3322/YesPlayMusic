@@ -25,7 +25,7 @@ module.exports = {
     iconPaths: {
       favicon32: 'img/icons/favicon-32x32.png',
     },
-    themeColor: '#ffffff00',
+    themeColor: '#335eea',
     manifestOptions: {
       background_color: '#335eea',
     },
