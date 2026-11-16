@@ -18,7 +18,12 @@ export function getMP3(id) {
   const getBr = () => {
     // 当返回的 quality >= 400000时，就会优先返回 hi-res
     const quality = store.state.settings?.musicQuality ?? '320000';
-    const br = quality === 'flac' ? '350000' : quality; const isSafari = typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Android/.test(navigator.userAgent); return isSafari && Number(br) > 320000 ? '320000' : br;
+    const br = quality === 'flac' ? '350000' : quality;
+    const isSafari =
+       typeof navigator !== 'undefined'
+      && /Safari/.test(navigator.userAgent)
+      && !/Chrome|Chromium|Android/.test(navigator.userAgent);
+    return isSafari && Number(br) > 320000 ? '320000' : br;
   };
 
   return request({
