@@ -1009,8 +1009,8 @@ export default {
     flex-direction: column;
     padding-left: 78px;
     max-width: 460px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transition: 0.5s;
     scrollbar-width: none; // firefox
 
