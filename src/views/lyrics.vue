@@ -761,8 +761,10 @@ export default {
   filter: blur(50px) contrast(var(--contrast-lyrics-background))
     brightness(var(--brightness-lyrics-background));
   position: absolute;
-  height: 100vh; height: 100dvh;
-  width: 100vw; width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100%;
 
   .top-right,
   .bottom-left {
@@ -804,8 +806,10 @@ export default {
 
 .gradient-background {
   position: absolute;
-  height: 100vh; height: 100dvh;
-  width: 100vw; width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100%;
 }
 
 .left-side {
@@ -1005,7 +1009,8 @@ export default {
     flex-direction: column;
     padding-left: 78px;
     max-width: 460px;
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     transition: 0.5s;
     scrollbar-width: none; // firefox
 
@@ -1048,7 +1053,8 @@ export default {
     // 不能用 .line:last-child，因为最后一个子元素是右键菜单 (ContextMenu)
     .line#line-end {
       flex-shrink: 0;
-      height: 50vh; height: 50dvh;
+      height: 50vh;
+        height: 50dvh;
       margin: 0;
       padding: 0;
     }
@@ -1076,7 +1082,8 @@ export default {
   }
 
   .lyrics-container .line:first-child {
-    margin-top: 50vh; margin-top: 50dvh;
+    margin-top: 50vh;
+      margin-top: 50dvh;
   }
 }
 
