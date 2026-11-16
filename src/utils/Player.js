@@ -384,7 +384,11 @@ export default class {
   }
   _getAudioSourceBlobURL(data, bitRate) {
     // Create a new object URL.
-    const source = URL.createObjectURL(new Blob([data], { type: bitRate >= 350000 ? 'audio/flac' : 'audio/mpeg' }));
+    const source = URL.createObjectURL(
+      new Blob([data], {
+        type: bitRate >= 350000 ? 'audio/flac' : 'audio/mpeg',
+      })
+    );
 
     // Clean up the previous object URLs since we've created a new one.
     // Revoke object URLs can release the memory taken by a Blob,
