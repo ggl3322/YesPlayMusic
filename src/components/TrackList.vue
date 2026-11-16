@@ -198,8 +198,8 @@ export default {
       };
       this.rightClickedTrackIndex = -1;
     },
-   isTouchDevice() {
-       return !!(
+    isTouchDevice() {
+      return !!(
         window.matchMedia && window.matchMedia('(pointer: coarse)').matches
       );
     },
