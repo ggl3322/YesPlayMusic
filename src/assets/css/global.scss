@@ -135,3 +135,55 @@ a {
 .user-select-none {
   user-select: none;
 }
+
+/* 窄屏（手机竖屏）适配：竖屏宽度小于 768px 时，取消 html 的最小宽度，
+   否则页面会被撑到 768px 宽，在手机竖屏下呈现“放大裁切”的效果 */
+@media (max-width: 768px) {
+  html {
+    min-width: 0;
+  }
+  html,
+  body,
+  #app {
+    overflow-x: hidden;
+  }
+
+  /* 主内容区两侧留白改小 */
+  main {
+    padding: 64px 16px 96px 16px !important;
+    overflow-x: hidden !important;
+  }
+
+  /* 封面网格：5 列改 2 列 */
+  .cover-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px 12px !important;
+  }
+
+  /* 每日推荐 + 私人 FM 改为上下排列 */
+  .for-you-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 顶部导航：隐藏前进/后退按钮 */
+  .navigation-buttons {
+    display: none !important;
+  }
+
+  /* 底部播放条：减小两侧留白，隐藏音量条 */
+  .player .controls {
+    padding: 0 12px !important;
+  }
+  .player .volume-control {
+    display: none !important;
+  }
+
+  /* 歌词页：隐藏左侧封面区，歌词通栏显示 */
+  .lyrics-page .left-side {
+    display: none !important;
+  }
+  .lyrics-page .lyrics-container {
+    padding-left: 0 !important;
+    max-width: none !important;
+  }
+}
