@@ -198,10 +198,9 @@ export default {
       };
       this.rightClickedTrackIndex = -1;
     },
-     isTouchDevice() {
+   isTouchDevice() {
        return !!(
-        window.matchMedia &&
-        window.matchMedia('(pointer: coarse)').matches
+        window.matchMedia && window.matchMedia('(pointer: coarse)').matches
       );
     },
     playOnTouch(e, track) {
