@@ -382,9 +382,9 @@ export default class {
     }
     this.setOutputDevice();
   }
-  _getAudioSourceBlobURL(data) {
+  _getAudioSourceBlobURL(data, bitRate) {
     // Create a new object URL.
-    const source = URL.createObjectURL(new Blob([data]));
+    const source = URL.createObjectURL(new Blob([data], { type: bitRate >= 350000 ? 'audio/flac' : 'audio/mpeg' }));
 
     // Clean up the previous object URLs since we've created a new one.
     // Revoke object URLs can release the memory taken by a Blob,
@@ -402,7 +402,7 @@ export default class {
   _getAudioSourceFromCache(id) {
     return getTrackSource(id).then(t => {
       if (!t) return null;
-      return this._getAudioSourceBlobURL(t.source);
+      return this._getAudioSourceBlobURL(t.source, t.bitRate);
     });
   }
   _getAudioSourceFromNetease(track) {
