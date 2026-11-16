@@ -211,11 +211,194 @@ a {
   .section-one { flex-direction: column !important; }
   .section-one .songs { flex: none !important; width: 100% !important; margin-left: 0 !important; margin-top: 16px !important; }
   .liked-songs { flex: none !important; width: 100% !important; flex-direction: row !important; align-items: center !important; padding: 16px !important; }
-  .liked-songs .top { flex: 1 !important; min-width: 0 !important; }
+  .liked-songs 
   .liked-songs .bottom { flex: none !important; margin-left: 12px !important; }
   .liked-songs .bottom .title { font-size: 18px !important; }
   /* 歌词页底部控制栏：隐藏日期与封面，控制区通栏 */
   .lyrics-page .left-side .date, .lyrics-page .left-side .cover { display: none !important; }
   .lyrics-page .left-side .controls { max-width: none !important; width: 100% !important; margin-top: 0 !important; }
   .lyrics-page .volume-control { display: none !important; }
+}
+
+/* 移动端竖屏补充（以 375px 为基线）：专辑 / 艺人 / 歌单页、搜索 / 发现 / 设置 / 登录页、触摸滚动与 iOS 安全区 */
+@media (max-width: 768px) {
+  /* 主区域与导航、播放条：计入 iOS 安全区（刘海 / 灵动岛 / Home 指示条），主区域保留 iOS 动量滚动 */
+  main {
+    padding: calc(64px + env(safe-area-inset-top, 0px)) 16px calc(96px + env(safe-area-inset-bottom, 0px)) 16px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  nav {
+    padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)) !important;
+  }
+  .player {
+    height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+  /* 输入框不小于 16px，避免 iOS 聚焦时自动放大页面 */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  .search-box input {
+    font-size: 16px !important;
+  }
+  /* 专辑页与歌单页共用的头部：改为上下排列，封面缩小、标题缩小、站内搜索框改为静态通栏 */
+  .album-page,
+  .playlist {
+    margin-top: 16px !important;
+  }
+  .playlist-info {
+    flex-direction: column !important;
+    width: 100% !important;
+    margin-bottom: 32px !important;
+  }
+  .playlist-info .info {
+    margin-left: 0 !important;
+    margin-top: 20px !important;
+    min-width: 0 !important;
+  }
+  .playlist-info .info .title {
+    font-size: 24px !important;
+    line-height: 1.25 !important;
+  }
+  .album-page .playlist-info .info .title {
+    font-size: 28px !important;
+  }
+  .playlist-info .cover img {
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .playlist-info .info .artist {
+    margin-top: 12px !important;
+  }
+  .playlist-info .info .description {
+    margin-top: 12px !important;
+  }
+  .playlist-info .info .buttons {
+    margin-top: 20px !important;
+    flex-wrap: wrap !important;
+  }
+  .playlist-info .search-box {
+    position: static !important;
+    margin-top: 16px !important;
+  }
+  .playlist-info .search-box .container {
+    width: 100% !important;
+  }
+  .playlist .special-playlist {
+    margin-top: 48px !important;
+    margin-bottom: 48px !important;
+  }
+  .playlist .special-playlist .title {
+    font-size: 36px !important;
+    letter-spacing: 2px !important;
+  }
+  .playlist .special-playlist .subtitle {
+    margin: 16px 0 28px 0 !important;
+  }
+  .playlist .search-box-likepage {
+    position: static !important;
+    margin-top: 12px !important;
+  }
+  /* 艺人页：头像与名字上下排列，最新发行改为上下排列 */
+  .artist-page {
+    margin-top: 16px !important;
+  }
+  .artist-info {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    margin-bottom: 16px !important;
+  }
+  .artist-info img {
+    height: 160px !important;
+    width: 160px !important;
+    margin-right: 0 !important;
+    margin-bottom: 16px !important;
+  }
+  .artist-info .name {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+  }
+  .artist-info .artist {
+    margin-top: 8px !important;
+  }
+  .artist-info .description {
+    margin-top: 12px !important;
+  }
+  .artist-info .buttons {
+    margin-top: 16px !important;
+    flex-wrap: wrap !important;
+  }
+  .artist-page .section-title {
+    padding-top: 24px !important;
+    font-size: 20px !important;
+  }
+  .artist-page .latest-release .release {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .artist-page .latest-release .container {
+    flex: none !important;
+    width: 100% !important;
+  }
+  .artist-page .latest-release .latest-mv img {
+    width: 100% !important;
+    height: auto !important;
+  }
+  /* 歌曲列表：多列网格改为单列；行内隐藏专辑列与点赞区，给标题留出空间 */
+  .track-list > div {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  .track .album {
+    display: none !important;
+  }
+  .track .actions {
+    display: none !important;
+  }
+  .track .title-and-artist {
+    min-width: 0 !important;
+  }
+  .track img {
+    margin-right: 12px !important;
+  }
+  .track .no {
+    margin: 0 12px 0 4px !important;
+  }
+  /* MV 行改为两列 */
+  .mv-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* 搜索 / 发现 / 登录 / 设置页：双栏改为单栏，分类按钮允许换行 */
+  .search-page .row {
+    flex-direction: column !important;
+  }
+  .explore-page .buttons {
+    flex-wrap: wrap !important;
+  }
+  .explore-page .panel .cats {
+    flex-wrap: wrap !important;
+  }
+  .login .section-2 {
+    flex-direction: column !important;
+  }
+  .login .section-2 .card {
+    width: 100% !important;
+    margin-bottom: 16px !important;
+  }
+  .settings-page .user {
+    flex-wrap: wrap !important;
+  }
+  .settings-page .item {
+    flex-wrap: wrap !important;
+  }
+  /* 歌词页关闭按钮：避开顶部安全区；歌词容器保留 iOS 动量滚动 */
+  .lyrics-page .close-button {
+    top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 12px) !important;
+  }
+  .lyrics-page .lyrics-container {
+    -webkit-overflow-scrolling: touch;
+  }
 }
