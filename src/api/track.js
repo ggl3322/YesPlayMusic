@@ -20,9 +20,9 @@ export function getMP3(id) {
     const quality = store.state.settings?.musicQuality ?? '320000';
     const br = quality === 'flac' ? '350000' : quality;
     const isSafari =
-       typeof navigator !== 'undefined'
-      && /Safari/.test(navigator.userAgent)
-      && !/Chrome|Chromium|Android/.test(navigator.userAgent);
+      typeof navigator !== 'undefined' &&
+      /Safari/.test(navigator.userAgent) &&
+      !/Chrome|Chromium|Android/.test(navigator.userAgent);
     return isSafari && Number(br) > 320000 ? '320000' : br;
   };
 
