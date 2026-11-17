@@ -9,6 +9,11 @@
     </h1>
     <div class="section-one">
       <div class="liked-songs" @click="goToLikedSongsList">
+        <div
+          v-if="liked.playlists.length > 0"
+          class="liked-songs-background"
+          :style="{ backgroundImage: 'url(' + liked.playlists[0].coverImgUrl + ')' }"
+        />
         <div class="bottom">
           <div class="titles">
             <div class="title">{{ $t('library.likedSongs') }}</div>
@@ -393,9 +398,47 @@ h1 {
   transition: all 0.4s;
   box-sizing: border-box;
 
-  background: var(--color-primary-bg);
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(20, 24, 38, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  @supports ((-webkit-backdrop-filter: blur(14px)) or (backdrop-filter: blur(14px))) {
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
+  }
+  &::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    content: '';
+    background-color: rgba(20, 24, 38, 0.35);
+    background-image: linear-gradient(
+      rgba(255, 255, 255, 0.25),
+      rgba(255, 255, 255, 0)
+    );
+    pointer-events: none;
+  }
+  .liked-songs-background {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    bottom: -16px;
+    left: -16px;
+    z-index: 0;
+    background-position: center;
+    background-size: cover;
+    filter: blur(16px) saturate(1.2);
+    transform: scale(1.15);
+    pointer-events: none;
+  }
 
   .bottom {
+    position: relative;
+    z-index: 2;
     display: flex;
     width: 100%;
     justify-content: space-between;
