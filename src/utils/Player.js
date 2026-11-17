@@ -84,6 +84,7 @@ export default class {
     this._personalFMNextTrack = {
       id: 0,
     }; // 私人FM下一首歌曲信息（为了快速加载下一首）
+    this._consecutiveTrackLoadFailures = 0; // 连续切歌失败次数，过多时停止，避免无限跳歌
 
     /**
      * The blob records for cleanup.
@@ -241,6 +242,9 @@ export default class {
   }
   _setPlaying(isPlaying) {
     this._playing = isPlaying;
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
     if (isCreateTray) {
       ipcRenderer?.send('updateTrayPlayState', this._playing);
     }
@@ -404,23 +408,27 @@ export default class {
     return source;
   }
   _getAudioSourceFromCache(id) {
-    return getTrackSource(id).then(t => {
-      if (!t) return null;
-      return this._getAudioSourceBlobURL(t.source, t.bitRate);
-    });
+    return getTrackSource(id)
+      .then(t => {
+        if (!t) return null;
+        return this._getAudioSourceBlobURL(t.source, t.bitRate);
+      })
+      .catch(() => null);
   }
   _getAudioSourceFromNetease(track) {
     if (isAccountLoggedIn()) {
-      return getMP3(track.id).then(result => {
-        if (!result.data[0]) return null;
-        if (!result.data[0].url) return null;
-        if (result.data[0].freeTrialInfo !== null) return null; // 跳过只能试听的歌曲
-        const source = result.data[0].url.replace(/^http:/, 'https:');
-        if (store.state.settings.automaticallyCacheSongs) {
-          cacheTrackSource(track, source, result.data[0].br);
-        }
-        return source;
-      });
+      return getMP3(track.id)
+        .then(result => {
+          if (!result.data[0]) return null;
+          if (!result.data[0].url) return null;
+          if (result.data[0].freeTrialInfo !== null) return null; // 跳过只能试听的歌曲
+          const source = result.data[0].url.replace(/^http:/, 'https:');
+          if (store.state.settings.automaticallyCacheSongs) {
+            cacheTrackSource(track, source, result.data[0].br);
+          }
+          return source;
+        })
+        .catch(() => null);
     } else {
       return new Promise(resolve => {
         resolve(`https://music.163.com/song/media/outer/url?id=${track.id}`);
@@ -502,7 +510,8 @@ export default class {
       })
       .then(source => {
         return source ?? this._getAudioSourceFromUnblockMusic(track);
-      });
+      })
+      .catch(() => null);
   }
   _replaceCurrentTrack(
     id,
@@ -512,17 +521,49 @@ export default class {
     if (autoplay && this._currentTrack.name) {
       this._scrobble(this.currentTrack, this._howler?.seek());
     }
-    return getTrackDetail(id).then(data => {
-      const track = data.songs[0];
-      this._currentTrack = track;
-      this._updateMediaSessionMetaData(track);
-      return this._replaceCurrentTrackAudio(
-        track,
-        autoplay,
-        true,
-        ifUnplayableThen
-      );
-    });
+    return getTrackDetail(id)
+      .then(data => {
+        const track = data.songs && data.songs[0];
+        if (!track) {
+          throw new Error('empty track detail');
+        }
+        this._currentTrack = track;
+        this._updateMediaSessionMetaData(track);
+        return this._replaceCurrentTrackAudio(
+          track,
+          autoplay,
+          true,
+          ifUnplayableThen
+        );
+      })
+      .then(replaced => {
+        if (replaced) {
+          this._consecutiveTrackLoadFailures = 0;
+        }
+        return replaced;
+      })
+      .catch(() => {
+        // 歌曲详情获取失败（网络错误、API 超时等）：跳到下一首，避免播放器卡在已播完的歌曲上
+        this._consecutiveTrackLoadFailures += 1;
+        if (!autoplay) {
+          // 启动恢复时不自动跳歌，等用户按播放时再重试
+          return false;
+        }
+        if (this._consecutiveTrackLoadFailures >= 5) {
+          this._consecutiveTrackLoadFailures = 0;
+          store.dispatch('showToast', '加载歌曲失败，请检查网络后重试');
+          this._howler?.stop();
+          this._setPlaying(false);
+          return false;
+        }
+        store.dispatch('showToast', '加载歌曲失败，已跳到下一首');
+        if (ifUnplayableThen === UNPLAYABLE_CONDITION.PLAY_PREV_TRACK) {
+          this.playPrevTrack();
+        } else {
+          this._playNextTrack(this.isPersonalFM);
+        }
+        return false;
+      });
   }
   /**
    * @returns 是否成功加载音频，并使用加载完成的音频替换了howler实例
@@ -570,10 +611,13 @@ export default class {
       : this._getNextTrack()[0];
     if (!nextTrackID) return;
     if (this._personalFMTrack.id == nextTrackID) return;
-    getTrackDetail(nextTrackID).then(data => {
-      let track = data.songs[0];
-      this._getAudioSource(track);
-    });
+    getTrackDetail(nextTrackID)
+      .then(data => {
+        let track = data.songs && data.songs[0];
+        if (!track) return;
+        this._getAudioSource(track);
+      })
+      .catch(() => {});
   }
   _loadSelfFromLocalStorage() {
     const player = JSON.parse(localStorage.getItem('player'));
@@ -832,6 +876,11 @@ export default class {
     });
   }
   play() {
+    if (!this._howler) {
+      // 尚无已加载的音频（例如首曲加载失败）：重新加载当前曲目
+      this._replaceCurrentTrack(this.currentTrackID, true);
+      return;
+    }
     if (this._howler?.playing()) return;
 
     this._howler?.play();

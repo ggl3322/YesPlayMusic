@@ -223,7 +223,7 @@ export default {
     },
   },
   mounted() {
-    this.setupMediaControls();
+    // Media Session 处理器由 Player.js 的 _initMediaSession 统一注册，此处不再重复注册
     window.addEventListener('keydown', this.handleKeydown);
   },
   beforeDestroy() {
@@ -289,23 +289,6 @@ export default {
     },
     mute() {
       this.player.mute();
-    },
-
-    setupMediaControls() {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', () => {
-          this.playOrPause();
-        });
-        navigator.mediaSession.setActionHandler('pause', () => {
-          this.playOrPause();
-        });
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-          this.playPrevTrack();
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-          this.playNextTrack();
-        });
-      }
     },
 
     handleKeydown(event) {
