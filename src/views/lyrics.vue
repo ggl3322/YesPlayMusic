@@ -2,7 +2,12 @@
   <transition name="slide-up">
     <div
       class="lyrics-page"
-      :class="{ 'no-lyric': noLyric, 'ipod-theme': playerTheme !== 'default' }"
+      :class="{
+        'no-lyric': noLyric,
+        'ipod-theme': playerTheme !== 'default',
+        'ipod-classic-theme': playerTheme === 'ipod-classic',
+        'ipod-touch-theme': playerTheme === 'ipod-touch',
+      }"
       :data-theme="theme"
     >
       <div v-if="playerTheme === 'ipod-classic'" class="ipod-classic">
@@ -1544,9 +1549,14 @@ export default {
   transform: translateX(27vh);
   opacity: 0;
 }
-.lyrics-page.ipod-theme > .lyrics-page-bg,
-.lyrics-page.ipod-theme > .lyrics-page-content {
+.lyrics-page.ipod-theme > :not(.ipod-classic):not(.ipod-touch) {
   display: none;
+}
+.lyrics-page.ipod-classic-theme {
+  background: #f2f2f2;
+}
+.lyrics-page.ipod-touch-theme {
+  background: #000000;
 }
 .ipod-classic,
 .ipod-touch {
