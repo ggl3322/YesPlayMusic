@@ -27,8 +27,8 @@
               />
             </div>
             <div class="ipod-times">
-              <span>{{ formatTime(player.progress) || '0:00' }}</span>
-              <span>-{{ formatTime(ipodRemaining) || '0:00' }}</span>
+              <span>{{ formatSeconds(player.progress) || '0:00' }}</span>
+              <span>-{{ formatSeconds(ipodRemaining) || '0:00' }}</span>
             </div>
             <div ref="ipodClassicLyrics" class="ipod-lyrics">
               <div
@@ -95,8 +95,8 @@
           />
         </div>
         <div class="ipod-touch-times">
-          <span>{{ formatTime(player.progress) || '0:00' }}</span>
-          <span>-{{ formatTime(ipodRemaining) || '0:00' }}</span>
+          <span>{{ formatSeconds(player.progress) || '0:00' }}</span>
+          <span>-{{ formatSeconds(ipodRemaining) || '0:00' }}</span>
         </div>
         <div class="ipod-touch-controls">
           <button
@@ -526,14 +526,14 @@ export default {
       return this.$store.state.settings.clickSound !== false;
     },
     ipodProgress() {
-      const duration = (this.track.dt || 0) / 1000;
+      const duration = ((this.track && this.track.dt) || 0) / 1000;
       if (!duration) {
         return 0;
       }
       return Math.min(1, Math.max(0, this.player.progress / duration));
     },
     ipodRemaining() {
-      const duration = (this.track.dt || 0) / 1000;
+      const duration = ((this.track && this.track.dt) || 0) / 1000;
       return Math.max(0, duration - this.player.progress);
     },
     ...mapState(['player', 'settings', 'showLyrics']),
@@ -861,7 +861,7 @@ export default {
         1,
         Math.max(0, (event.clientX - rect.left) / rect.width)
       );
-      const duration = (this.track.dt || 0) / 1000;
+      const duration = ((this.track && this.track.dt) || 0) / 1000;
       if (!duration) {
         return;
       }
@@ -880,6 +880,12 @@ export default {
       this.timer = setInterval(function () {
         _this.date = _this.formatTime(new Date());
       }, 1000);
+    },
+    formatSeconds(value) {
+      const total = Math.max(0, Math.floor(Number(value) || 0));
+      const minutes = Math.floor(total / 60);
+      const seconds = total % 60;
+      return minutes + ':' + String(seconds).padStart(2, '0');
     },
     formatTime(value) {
       let hour = value.getHours().toString();
