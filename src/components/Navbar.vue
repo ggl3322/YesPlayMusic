@@ -357,55 +357,56 @@ nav.has-custom-titlebar {
   }
 }
 
+.search-box {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 1;
+  min-width: 0;
+  .container {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    width: 200px;
+    max-width: 100%;
+    border-radius: 8px;
+    background: var(--color-secondary-bg-for-transparent);
+    transition: 0.2s;
+    .svg-icon {
+      height: 15px;
+      width: 15px;
+      color: var(--color-text);
+      margin-left: 10px;
+      margin-right: 6px;
+    }
+    input {
+      font-size: 16px;
+      border: none;
+      background: transparent;
+      width: 96%;
+      font-weight: 600;
+      color: var(--color-text);
+      &::placeholder {
+        color: var(--color-text);
+        opacity: 0.28;
+      }
+    }
+    &.active {
+      background: var(--color-primary-bg-for-transparent);
+      input,
+      .svg-icon {
+        opacity: 1;
+        color: var(--color-primary);
+      }
+    }
+  }
+}
+
 .right-part {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  .search-box {
-    display: flex;
-    justify-content: flex-end;
-    flex-shrink: 1;
-    min-width: 0;
-    .container {
-      display: flex;
-      align-items: center;
-      height: 32px;
-      width: 200px;
-      max-width: 100%;
-      border-radius: 8px;
-      background: var(--color-secondary-bg-for-transparent);
-      transition: 0.2s;
-      .svg-icon {
-        height: 15px;
-        width: 15px;
-        color: var(--color-text);
-        margin-left: 10px;
-        margin-right: 6px;
-      }
-      input {
-        font-size: 16px;
-        border: none;
-        background: transparent;
-        width: 96%;
-        font-weight: 600;
-        color: var(--color-text);
-        &::placeholder {
-          color: var(--color-text);
-          opacity: 0.28;
-        }
-      }
-      &.active {
-        background: var(--color-primary-bg-for-transparent);
-        input,
-        .svg-icon {
-          opacity: 1;
-          color: var(--color-primary);
-        }
-      }
-    }
-  }
   .avatar {
     user-select: none;
     height: 30px;
