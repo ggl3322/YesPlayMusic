@@ -1434,7 +1434,7 @@ export default {
     },
     logout() {
       doLogout();
-      this.$router.push({ name: 'home' });
+      this.$router.push({ name: 'daily' });
     },
     countDBSize() {
       countDBSize().then(data => {
