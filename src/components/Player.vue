@@ -1,11 +1,6 @@
 <template>
   <div class="player" @click="handleClick" @mousedown="handleMouseDown">
     <div
-      v-show="showMorePanel"
-      class="more-panel-overlay"
-      @click.stop="showMorePanel = false"
-    ></div>
-    <div
       class="progress-bar"
       :class="{
         nyancat: settings.nyancatStyle,
@@ -242,6 +237,7 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener('click', this.handleDocumentClick);
   },
   methods: {
     ...mapMutations(['toggleLyrics']),
@@ -270,6 +266,7 @@ export default {
     goToNextTracksPage() {
       if (this.player.isPersonalFM) return;
       this.showMorePanel = false;
+      document.removeEventListener('click', this.handleDocumentClick);
       this.$route.name === 'next'
         ? this.$router.go(-1)
         : this.$router.push({ name: 'next' });
@@ -307,6 +304,15 @@ export default {
     },
     toggleMorePanel() {
       this.showMorePanel = !this.showMorePanel;
+      if (this.showMorePanel) {
+        document.addEventListener('click', this.handleDocumentClick);
+      } else {
+        document.removeEventListener('click', this.handleDocumentClick);
+      }
+    },
+    handleDocumentClick() {
+      this.showMorePanel = false;
+      document.removeEventListener('click', this.handleDocumentClick);
     },
     handleKeydown(event) {
       switch (event.code) {
@@ -512,15 +518,6 @@ export default {
   .volume-bar {
     width: 120px;
   }
-}
-
-.more-panel-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 90;
 }
 
 .like-button {
