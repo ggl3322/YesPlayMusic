@@ -1573,27 +1573,25 @@ export default {
 }
 .ipod-classic {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(12px + env(safe-area-inset-top))
-    calc(16px + env(safe-area-inset-right))
-    calc(16px + env(safe-area-inset-bottom))
-    calc(16px + env(safe-area-inset-left));
+  flex-direction: column;
+  padding: 0;
   background: #f2f2f2;
 }
 .ipod-device {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   width: 100%;
-  max-width: 360px;
+  min-height: 0;
   box-sizing: border-box;
-  padding: 18px 14px 22px;
-  border-radius: 28px;
   background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 55%, #e9e9e9 100%);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 #ffffff;
 }
 .ipod-screen {
-  padding: 10px;
-  border: 6px solid #111111;
-  border-radius: 6px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: max(20px, calc(12px + env(safe-area-inset-top))) 16px 12px;
   background: #eef2e6;
   color: #111111;
 }
@@ -1647,7 +1645,8 @@ export default {
   font-variant-numeric: tabular-nums;
 }
 .ipod-lyrics {
-  height: 180px;
+  flex: 1;
+  min-height: 0;
   margin-top: 8px;
   overflow-y: auto;
   text-align: center;
@@ -1669,9 +1668,10 @@ export default {
 }
 .ipod-wheel {
   position: relative;
-  width: 240px;
-  height: 240px;
-  margin: 22px auto 0;
+  flex-shrink: 0;
+  width: min(82vw, 40vh, 360px);
+  aspect-ratio: 1;
+  margin: 16px auto calc(16px + env(safe-area-inset-bottom));
   border: 1px solid #b5b5b5;
   border-radius: 50%;
   background: radial-gradient(circle, #f5f5f5 55%, #d9d9d9 100%);
@@ -1685,8 +1685,8 @@ export default {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 84px;
-  height: 84px;
+  width: 35%;
+  height: 35%;
   transform: translate(-50%, -50%);
   border: 1px solid #c9c9c9;
   border-radius: 50%;
@@ -1702,22 +1702,22 @@ export default {
 }
 .ipod-wheel-menu {
   left: 50%;
-  top: 10px;
+  top: 4%;
   transform: translateX(-50%);
 }
 .ipod-wheel-prev {
-  left: 14px;
+  left: 6%;
   top: 50%;
   transform: translateY(-50%);
 }
 .ipod-wheel-next {
-  right: 14px;
+  right: 6%;
   top: 50%;
   transform: translateY(-50%);
 }
 .ipod-wheel-play {
   left: 50%;
-  bottom: 10px;
+  bottom: 4%;
   transform: translateX(-50%);
 }
 .ipod-touch {
@@ -1842,13 +1842,9 @@ export default {
 .ipod-touch-lyrics .ipod-lyric-line.active {
   color: #ffffff;
 }
-@media (max-width: 380px) {
+@media (max-height: 700px) {
   .ipod-wheel {
-    width: 220px;
-    height: 220px;
-  }
-  .ipod-lyrics {
-    height: 150px;
+    width: min(76vw, 40vh, 320px);
   }
 }
 </style>
