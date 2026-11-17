@@ -6,7 +6,17 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'home',
+    name: 'library',
+    component: () => import('@/views/library.vue'),
+    meta: {
+    requireLogin: true,
+      keepAlive: true,
+      savePosition: true,
+    },
+  },
+  {
+    path: '/home',
+    name: 'daily',
     component: () => import('@/views/home.vue'),
     meta: {
       keepAlive: true,
@@ -98,13 +108,7 @@ const routes = [
   },
   {
     path: '/library',
-    name: 'library',
-    component: () => import('@/views/library.vue'),
-    meta: {
-      requireLogin: true,
-      keepAlive: true,
-      savePosition: true,
-    },
+    redirect: '/',
   },
   {
     path: '/library/liked-songs',
