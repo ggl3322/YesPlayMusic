@@ -31,7 +31,7 @@
       </div>
       <div class="navigation-links">
         <router-link
-        :to="{ name: 'library' }"
+          :to="{ name: 'library' }"
           :class="{ active: $route.name === 'library' }"
           >{{ $t('nav.library') }}</router-link
         >
@@ -58,8 +58,8 @@
       </div>
       <div v-show="isNavMenuOpen" class="nav-dropdown">
         <router-link
-        :to="{ name: 'daily' }"
-        :class="{ active: $route.name === 'daily' }"
+          :to="{ name: 'daily' }"
+          :class="{ active: $route.name === 'daily' }"
           @click.native="closeNavMenu"
           >每日推荐</router-link
         >
