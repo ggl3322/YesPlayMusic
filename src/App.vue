@@ -2,7 +2,7 @@
   <div id="app" :class="{ 'user-select-none': userSelectNone }">
     <div v-if="!pinUnlocked" class="pin-gate">
       <div class="pin-gate-card">
-        <div class="pin-gate-title">YesPlayMusic</div>
+        <div class="pin-gate-title">咪头Music</div>
         <div class="pin-gate-subtitle">请输入 4 位 PIN 码解锁</div>
         <div class="pin-dots" :class="{ 'pin-dots-error': pinError }">
           <span
