@@ -229,21 +229,21 @@ nav.has-custom-titlebar {
 }
   @media (max-width: 768px) {
   nav {
-  padding: 0 12px;
+    padding: 0 12px;
   }
   .navigation-buttons {
   display: none;
   }
   .navigation-links a {
-  font-size: 16px;
-  padding: 6px 6px;
-  margin-right: 6px;
+    font-size: 16px;
+    padding: 6px 6px;
+    margin-right: 6px;
   margin-left: 6px;
   }
   .search-box .container {
   width: 140px;
   }
-  }
+}
 
 .navigation-links {
   flex: 1;
