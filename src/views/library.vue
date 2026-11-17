@@ -13,7 +13,7 @@
           <div class="titles">
             <div class="title">{{ $t('library.likedSongs') }}</div>
             <div class="sub-title">
-              {{ liked.songs.length }}{{ $t('common.songs') }}
+              {{ liked.songs.length }} {{ $t('common.songs') }}
             </div>
           </div>
           <button @click.stop="openPlayModeTabMenu">
@@ -31,6 +31,7 @@
         />
       </div>
     </div>
+
     <div class="section-two">
       <div class="tabs-row">
         <div class="tabs">
@@ -64,139 +65,291 @@
           >
             {{ $t('library.artists') }}
           </div>
+          <div
+            class="tab"
+            :class="{ active: currentTab === 'mvs' }"
+            @click="updateCurrentTab('mvs')"
+          >
+            {{ $t('library.mvs') }}
+          </div>
+          <div
+            class="tab"
+            :class="{ active: currentTab === 'cloudDisk' }"
+            @click="updateCurrentTab('cloudDisk')"
+          >
+            {{ $t('library.cloudDisk') }}
+          </div>
+          <div
+            class="tab"
+            :class="{ active: currentTab === 'playHistory' }"
+            @click="updateCurrentTab('playHistory')"
+          >
+            {{ $t('library.playHistory.title') }}
+          </div>
         </div>
         <button
           v-show="currentTab === 'playlists'"
           class="tab-button"
-          @click="openAddPlaylistDialog"
-        >
-          <svg-icon icon-class="plus" /> {{ $t('library.newPlaylist') }}
+          @click="openAddPlaylistModal"
+          ><svg-icon icon-class="plus" />{{ $t('library.newPlayList') }}
+        </button>
+        <button
+          v-show="currentTab === 'cloudDisk'"
+          class="tab-button"
+          @click="selectUploadFiles"
+          ><svg-icon icon-class="arrow-up-alt" />{{ $t('library.uploadSongs') }}
         </button>
       </div>
 
       <div v-show="currentTab === 'playlists'">
-        <CoverRow
-          :items="filteredPlaylists"
-          type="playlist"
-          :show-play-button="true"
-        />
+        <div v-if="liked.playlists.length > 1">
+          <CoverRow
+            :items="filterPlaylists"
+            type="playlist"
+            sub-text="creator"
+            :show-play-button="true"
+          />
+        </div>
       </div>
+
       <div v-show="currentTab === 'albums'">
         <CoverRow
           :items="liked.albums"
           type="album"
+          sub-text="artist"
           :show-play-button="true"
         />
       </div>
+
       <div v-show="currentTab === 'artists'">
-        <CoverRow :items="liked.artists" type="artist" :show-play-button="true" />
+        <CoverRow
+          :items="liked.artists"
+          type="artist"
+          :show-play-button="true"
+        />
+      </div>
+
+      <div v-show="currentTab === 'mvs'">
+        <MvRow :mvs="liked.mvs" />
+      </div>
+
+      <div v-show="currentTab === 'cloudDisk'">
+        <TrackList
+          :id="-8"
+          :tracks="liked.cloudDisk"
+          :column-number="3"
+          type="cloudDisk"
+          dbclick-track-func="playCloudDisk"
+          :extra-context-menu-item="['removeTrackFromCloudDisk']"
+        />
+      </div>
+
+      <div v-show="currentTab === 'playHistory'">
+        <button
+          :class="{
+            'playHistory-button': true,
+            'playHistory-button--selected': playHistoryMode === 'week',
+          }"
+          @click="playHistoryMode = 'week'"
+        >
+          {{ $t('library.playHistory.week') }}
+        </button>
+        <button
+          :class="{
+            'playHistory-button': true,
+            'playHistory-button--selected': playHistoryMode === 'all',
+          }"
+          @click="playHistoryMode = 'all'"
+        >
+          {{ $t('library.playHistory.all') }}
+        </button>
+        <TrackList
+          :tracks="playHistoryList"
+          :column-number="1"
+          type="tracklist"
+        />
       </div>
     </div>
+
+    <input
+      ref="cloudDiskUploadInput"
+      type="file"
+      style="display: none"
+      @change="uploadSongToCloudDisk"
+    />
+
+    <ContextMenu ref="playlistTabMenu">
+      <div class="item" @click="changePlaylistFilter('all')">{{
+        $t('contextMenu.allPlaylists')
+      }}</div>
+      <hr />
+      <div class="item" @click="changePlaylistFilter('mine')">{{
+        $t('contextMenu.minePlaylists')
+      }}</div>
+      <div class="item" @click="changePlaylistFilter('liked')">{{
+        $t('contextMenu.likedPlaylists')
+      }}</div>
+    </ContextMenu>
+
+    <ContextMenu ref="playModeTabMenu">
+      <div class="item" @click="playLikedSongs">{{
+        $t('library.likedSongs')
+      }}</div>
+      <hr />
+      <div class="item" @click="playIntelligenceList">{{
+        $t('contextMenu.cardiacMode')
+      }}</div>
+    </ContextMenu>
   </div>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapMutations, mapState } from 'vuex';
+import { dailyTask } from '@/utils/common';
 import { isAccountLoggedIn } from '@/utils/auth';
-import { getLikedSongsWithDetails } from '@/utils/data';
+import { uploadSong } from '@/api/user';
 
+import NProgress from 'nprogress';
+import locale from '@/locale';
+
+import ContextMenu from '@/components/ContextMenu.vue';
 import TrackList from '@/components/TrackList.vue';
 import CoverRow from '@/components/CoverRow.vue';
+import SvgIcon from '@/components/SvgIcon.vue';
+import MvRow from '@/components/MvRow.vue';
 
 export default {
   name: 'Library',
-  components: {
-    TrackList,
-    CoverRow,
-  },
+  components: { SvgIcon, CoverRow, TrackList, MvRow, ContextMenu },
   data() {
     return {
       show: false,
+      likedSongs: [],
+
       currentTab: 'playlists',
-      playlistFilter: 'all',
+      playHistoryMode: 'week',
     };
   },
   computed: {
-    ...mapState(['liked', 'data']),
-    filteredPlaylists() {
-      return this.liked.playlists.filter(p => {
-        if (this.playlistFilter === 'all') return true;
-        if (this.playlistFilter === 'mine')
-          return p.creator.userId === this.data.user.id;
-        if (this.playlistFilter === 'liked')
-          return p.creator.userId !== this.data.user.id;
-        return true;
-      });
+    ...mapState(['data', 'liked']),
+
+    playlistFilter() {
+      return this.data.libraryPlaylistFilter || 'all';
+    },
+    filterPlaylists() {
+      const playlists = this.liked.playlists.slice(1);
+      const userId = this.data.user.userId;
+      if (this.playlistFilter === 'mine') {
+        return playlists.filter(p => p.creator.userId === userId);
+      } else if (this.playlistFilter === 'liked') {
+        return playlists.filter(p => p.creator.userId !== userId);
+      }
+      return playlists;
+    },
+    playHistoryList() {
+      if (this.show && this.playHistoryMode === 'week') {
+        return this.liked.playHistory.weekData;
+      }
+      if (this.show && this.playHistoryMode === 'all') {
+        return this.liked.playHistory.allData;
+      }
+      return [];
     },
   },
   created() {
-    if (!isAccountLoggedIn()) {
-      this.$router.push({ path: '/login' });
-      return;
-    }
+    setTimeout(() => {
+      if (!this.show) NProgress.start();
+    }, 1000);
+    this.loadData();
   },
   activated() {
-    this.show = true;
+    this.$parent.$refs.scrollbar.restorePosition();
     this.loadData();
+    dailyTask();
   },
   methods: {
     ...mapActions(['showToast']),
+    ...mapMutations(['updateModal', 'updateData']),
     loadData() {
-      getLikedSongsWithDetails();
+      if (this.liked.songsWithDetails.length > 0) {
+        NProgress.done();
+        this.show = true;
+        this.$store.dispatch('fetchLikedSongsWithDetails');
+      } else {
+        this.$store.dispatch('fetchLikedSongsWithDetails').then(() => {
+          NProgress.done();
+          this.show = true;
+        });
+      }
+      this.$store.dispatch('fetchLikedSongs');
+      this.$store.dispatch('fetchLikedPlaylist');
+      this.$store.dispatch('fetchLikedAlbums');
+      this.$store.dispatch('fetchLikedArtists');
+      this.$store.dispatch('fetchLikedMVs');
+      this.$store.dispatch('fetchCloudDisk');
+      this.$store.dispatch('fetchPlayHistory');
     },
-    goToLikedSongsList() {
-      this.$router.push({
-        path: '/playlist/' + this.liked.playlists[0].id,
-      });
+    playLikedSongs() {
+      this.$store.state.player.playPlaylistByID(
+        this.liked.playlists[0].id,
+        'first',
+        true
+      );
+    },
+    playIntelligenceList() {
+      this.$store.state.player.playIntelligenceListById(
+        this.liked.playlists[0].id,
+        'first',
+        true
+      );
     },
     updateCurrentTab(tab) {
+      if (!isAccountLoggedIn() && tab !== 'playlists') {
+        this.showToast(locale.t('toast.needToLogin'));
+        return;
+      }
       this.currentTab = tab;
+      this.$parent.$refs.main.scrollTo({ top: 375, behavior: 'smooth' });
     },
-    openAddPlaylistDialog() {
-      this.$store.commit('updateAddPlaylistDialog', true);
+    goToLikedSongsList() {
+      this.$router.push({ path: '/library/liked-songs' });
     },
-    openPlayModeTabMenu(e) {
-      this.$store.commit('openContextMenu', {
-        event: e,
-        menu: [
-          {
-            label: this.$t('contextMenu.play'),
-            click: () => {
-              this.$store.dispatch('playLikedSongs');
-            },
-          },
-          {
-            label: this.$t('contextMenu.cardiacMode'),
-            click: () => {
-              this.$store.dispatch('cardiacMode');
-            },
-          },
-        ],
+
+    openAddPlaylistModal() {
+      if (!isAccountLoggedIn()) {
+        this.showToast(locale.t('toast.needToLogin'));
+        return;
+      }
+      this.updateModal({
+        modalName: 'newPlaylistModal',
+        key: 'show',
+        value: true,
       });
     },
     openPlaylistTabMenu(e) {
-      this.$store.commit('openContextMenu', {
-        event: e,
-        menu: [
-          {
-            label: this.$t('contextMenu.allPlaylists'),
-            click: () => {
-              this.playlistFilter = 'all';
-            },
-          },
-          {
-            label: this.$t('contextMenu.minePlaylists'),
-            click: () => {
-              this.playlistFilter = 'mine';
-            },
-          },
-          {
-            label: this.$t('contextMenu.likedPlaylists'),
-            click: () => {
-              this.playlistFilter = 'liked';
-            },
-          },
-        ],
+      this.$refs.playlistTabMenu.openMenu(e);
+    },
+    openPlayModeTabMenu(e) {
+      this.$refs.playModeTabMenu.openMenu(e);
+    },
+    changePlaylistFilter(type) {
+      this.updateData({ key: 'libraryPlaylistFilter', value: type });
+      window.scrollTo({ top: 375, behavior: 'smooth' });
+    },
+    selectUploadFiles() {
+      this.$refs.cloudDiskUploadInput.click();
+    },
+    uploadSongToCloudDisk(e) {
+      const files = e.target.files;
+      uploadSong(files[0]).then(result => {
+        if (result.code === 200) {
+          let newCloudDisk = this.liked.cloudDisk;
+          newCloudDisk.unshift(result.privateCloud);
+          this.$store.commit('updateLikedXXX', {
+            name: 'cloudDisk',
+            data: newCloudDisk,
+          });
+        }
       });
     },
   },
@@ -204,100 +357,202 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+h1 {
+  font-size: 42px;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  .avatar {
+    height: 44px;
+    margin-right: 12px;
+    vertical-align: -7px;
+    border-radius: 50%;
+    border: rgba(0, 0, 0, 0.2);
+  }
+}
+
 .section-one {
   display: flex;
-  gap: 12px;
-  .liked-songs {
-    flex: 3;
-    width: 100%;
-    height: 180px;
-    padding: 18px;
-    border-radius: 16px;
-    color: #fff;
-    background-image: linear-gradient(
-      120deg,
-      #5c7cfa 0%,
-      #335eea 55%,
-      #2b4fd8 100%
-    );
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(51, 94, 234, 0.25);
+  margin-top: 24px;
+  .songs {
+    flex: 7;
+    margin-top: 8px;
+    margin-left: 36px;
+    overflow: hidden;
   }
+}
+
+.liked-songs {
+  flex: 3;
+  margin-top: 8px;
+  cursor: pointer;
+  border-radius: 16px;
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s;
+  box-sizing: border-box;
+
+  background: var(--color-primary-bg);
+
   .bottom {
     display: flex;
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    margin-top: 8px;
+    color: var(--color-primary);
+
     .titles {
       flex: 1;
       min-width: 0;
     }
     .title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
-      line-height: 24px;
-      margin-bottom: 8px;
     }
     .sub-title {
-      font-size: 13px;
-      opacity: 0.8;
+      font-size: 15px;
+      margin-top: 2px;
     }
+
     button {
+      margin-bottom: 2px;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 44px;
       height: 44px;
+      width: 44px;
       flex-shrink: 0;
       margin-left: auto;
-      margin-bottom: 2px;
-      background-color: #335eea;
-      border: none;
+      background: var(--color-primary-gradient);
       border-radius: 50%;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
-      cursor: pointer;
       transition: 0.2s;
+      box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.2);
+      cursor: default;
+
+      .svg-icon {
+        color: var(--color-primary-bg);
+        margin-left: 4px;
+        height: 16px;
+        width: 16px;
+      }
       &:hover {
-        transform: scale(1.08);
-        background-color: #4067f5;
+        transform: scale(1.06);
+        box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.4);
       }
       &:active {
-        transform: scale(0.92);
-      }
-      .svg-icon {
-        width: 22px;
-        height: 22px;
-        color: #fff;
-        margin-left: 2px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        transform: scale(0.94);
       }
     }
   }
-  .songs {
-    flex: 7;
-    height: 180px;
-    overflow-y: hidden;
-    .track-list-item {
-      cursor: pointer;
-      .cover {
-        width: 40px;
-        height: 40px;
-        margin-right: 12px;
-      }
-      .name {
-        font-size: 14px;
-        font-weight: 600;
-      }
-      .ar {
-        font-size: 12px;
-        opacity: 0.6;
+}
+
+.section-two {
+  margin-top: 54px;
+  min-height: calc(100vh - 182px);
+}
+
+.tabs-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 18px;
+  color: var(--color-text);
+  .tab {
+    font-weight: 600;
+    padding: 8px 14px;
+    margin-right: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.2s;
+    opacity: 0.68;
+    &:hover {
+      opacity: 0.88;
+      background-color: var(--color-secondary-bg);
+    }
+  }
+  .tab.active {
+    opacity: 0.88;
+    background-color: var(--color-secondary-bg);
+  }
+  .tab.dropdown {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    overflow: hidden;
+    .text {
+      padding: 8px 3px 8px 14px;
+    }
+    .icon {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 8px 0 3px;
+      .svg-icon {
+        height: 16px;
+        width: 16px;
       }
     }
+  }
+}
+
+button.tab-button {
+  color: var(--color-text);
+  border-radius: 8px;
+  padding: 0 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.2s;
+  opacity: 0.68;
+  font-weight: 500;
+  .svg-icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+  }
+  &:hover {
+    opacity: 1;
+    background: var(--color-secondary-bg);
+  }
+  &:active {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+}
+
+button.playHistory-button {
+  color: var(--color-text);
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-bottom: 12px;
+  margin-right: 4px;
+  transition: 0.2s;
+  opacity: 0.68;
+  font-weight: 500;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+    background: var(--color-secondary-bg);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+button.playHistory-button--selected {
+  color: var(--color-text);
+  background: var(--color-secondary-bg);
+  opacity: 1;
+  font-weight: 700;
+  &:active {
+    transform: none;
   }
 }
 </style>
