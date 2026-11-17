@@ -1,6 +1,11 @@
 <template>
   <div class="player" @click="handleClick" @mousedown="handleMouseDown">
     <div
+      v-show="showMorePanel"
+      class="more-panel-overlay"
+      @click.stop="showMorePanel = false"
+    ></div>
+    <div
       class="progress-bar"
       :class="{
         nyancat: settings.nyancatStyle,
@@ -102,78 +107,86 @@
         <div class="blank"></div>
         <div class="container" @click.stop>
           <button-icon
-            :title="$t('player.nextUp')"
-            :class="{
-              active: $route.name === 'next',
-              disabled: player.isPersonalFM,
-            }"
-            @click.native="goToNextTracksPage"
-            ><svg-icon icon-class="list"
+            :class="{ active: showMorePanel }"
+            title="更多"
+            @click.native="toggleMorePanel"
+            ><svg-icon icon-class="more"
           /></button-icon>
-          <button-icon
-            :class="{
-              active: player.repeatMode !== 'off',
-              disabled: player.isPersonalFM,
-            }"
-            :title="
-              player.repeatMode === 'one'
-                ? $t('player.repeatTrack')
-                : $t('player.repeat')
-            "
-            @click.native="switchRepeatMode"
-          >
-            <svg-icon
-              v-show="player.repeatMode !== 'one'"
-              icon-class="repeat"
-            />
-            <svg-icon
-              v-show="player.repeatMode === 'one'"
-              icon-class="repeat-1"
-            />
-          </button-icon>
-          <button-icon
-            :class="{ active: player.shuffle, disabled: player.isPersonalFM }"
-            :title="$t('player.shuffle')"
-            @click.native="switchShuffle"
-            ><svg-icon icon-class="shuffle"
-          /></button-icon>
-          <button-icon
-            v-if="settings.enableReversedMode"
-            :class="{ active: player.reversed, disabled: player.isPersonalFM }"
-            :title="$t('player.reversed')"
-            @click.native="switchReversed"
-            ><svg-icon icon-class="sort-up"
-          /></button-icon>
-          <div class="volume-control">
-            <button-icon :title="$t('player.mute')" @click.native="mute">
-              <svg-icon v-show="volume > 0.5" icon-class="volume" />
-              <svg-icon v-show="volume === 0" icon-class="volume-mute" />
-              <svg-icon
-                v-show="volume <= 0.5 && volume !== 0"
-                icon-class="volume-half"
-              />
-            </button-icon>
-            <div class="volume-bar">
-              <vue-slider
-                v-model="volume"
-                :min="0"
-                :max="1"
-                :interval="0.01"
-                :drag-on-click="true"
-                :duration="0"
-                tooltip="none"
-                :dot-size="12"
-              ></vue-slider>
+          <div v-show="showMorePanel" class="more-panel" @click.stop>
+            <div class="more-panel-row">
+              <button-icon
+                :title="$t('player.nextUp')"
+                :class="{
+                  active: $route.name === 'next',
+                  disabled: player.isPersonalFM,
+                }"
+                @click.native="goToNextTracksPage"
+                ><svg-icon icon-class="list"
+              /></button-icon>
+              <button-icon
+                :class="{
+                  active: player.repeatMode !== 'off',
+                  disabled: player.isPersonalFM,
+                }"
+                :title="
+                  player.repeatMode === 'one'
+                    ? $t('player.repeatTrack')
+                    : $t('player.repeat')
+                "
+                @click.native="switchRepeatMode"
+              >
+                <svg-icon
+                  v-show="player.repeatMode !== 'one'"
+                  icon-class="repeat"
+                />
+                <svg-icon
+                  v-show="player.repeatMode === 'one'"
+                  icon-class="repeat-1"
+                />
+              </button-icon>
+              <button-icon
+                :class="{
+                  active: player.shuffle,
+                  disabled: player.isPersonalFM,
+                }"
+                :title="$t('player.shuffle')"
+                @click.native="switchShuffle"
+                ><svg-icon icon-class="shuffle"
+              /></button-icon>
+              <button-icon
+                v-if="settings.enableReversedMode"
+                :class="{
+                  active: player.reversed,
+                  disabled: player.isPersonalFM,
+                }"
+                :title="$t('player.reversed')"
+                @click.native="switchReversed"
+                ><svg-icon icon-class="sort-up"
+              /></button-icon>
+            </div>
+            <div class="volume-control">
+              <button-icon :title="$t('player.mute')" @click.native="mute">
+                <svg-icon v-show="volume > 0.5" icon-class="volume" />
+                <svg-icon v-show="volume === 0" icon-class="volume-mute" />
+                <svg-icon
+                  v-show="volume <= 0.5 && volume !== 0"
+                  icon-class="volume-half"
+                />
+              </button-icon>
+              <div class="volume-bar">
+                <vue-slider
+                  v-model="volume"
+                  :min="0"
+                  :max="1"
+                  :interval="0.01"
+                  :drag-on-click="true"
+                  :duration="0"
+                  tooltip="none"
+                  :dot-size="12"
+                ></vue-slider>
+              </div>
             </div>
           </div>
-
-          <button-icon
-            class="lyrics-button"
-            title="歌词"
-            style="margin-left: 12px"
-            @click.native="toggleLyrics"
-            ><svg-icon icon-class="arrow-up"
-          /></button-icon>
         </div>
       </div>
     </div>
@@ -198,6 +211,7 @@ export default {
   data() {
     return {
       mouseDownTarget: null,
+      showMorePanel: false,
     };
   },
   computed: {
@@ -255,6 +269,7 @@ export default {
     },
     goToNextTracksPage() {
       if (this.player.isPersonalFM) return;
+      this.showMorePanel = false;
       this.$route.name === 'next'
         ? this.$router.go(-1)
         : this.$router.push({ name: 'next' });
@@ -290,7 +305,9 @@ export default {
     mute() {
       this.player.mute();
     },
-
+    toggleMorePanel() {
+      this.showMorePanel = !this.showMorePanel;
+    },
     handleKeydown(event) {
       switch (event.code) {
         case 'MediaPlayPause':
@@ -444,6 +461,8 @@ export default {
 }
 
 .right-control-buttons .container {
+  position: relative;
+  z-index: 101;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -465,6 +484,43 @@ export default {
       width: 84px;
     }
   }
+}
+
+.more-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 12px;
+  border-radius: 12px;
+  background-color: var(--color-navbar-bg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.more-panel-row {
+  display: flex;
+  align-items: center;
+  .button-icon {
+    margin: 0 4px;
+  }
+}
+
+.right-control-buttons .container .more-panel .volume-control {
+  margin-top: 8px;
+  .volume-bar {
+    width: 120px;
+  }
+}
+
+.more-panel-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 90;
 }
 
 .like-button {
