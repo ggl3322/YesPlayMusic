@@ -1553,7 +1553,7 @@ export default {
   display: none;
 }
 .lyrics-page.ipod-classic-theme {
-  background: #f2f2f2;
+  background: #d2d2d2;
 }
 .lyrics-page.ipod-touch-theme {
   background: #000000;
@@ -1574,8 +1574,11 @@ export default {
 .ipod-classic {
   display: flex;
   flex-direction: column;
-  padding: 0;
-  background: #f2f2f2;
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-right: max(8px, env(safe-area-inset-right));
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  padding-left: max(8px, env(safe-area-inset-left));
+  background: #d2d2d2;
 }
 .ipod-device {
   display: flex;
@@ -1584,14 +1587,20 @@ export default {
   width: 100%;
   min-height: 0;
   box-sizing: border-box;
+  padding: 18px 14px 22px;
+  border-radius: 28px;
   background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 55%, #e9e9e9 100%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 #ffffff;
+  overflow: hidden;
 }
 .ipod-screen {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  padding: max(20px, calc(12px + env(safe-area-inset-top))) 16px 12px;
+  padding: 12px;
+  border: 6px solid #111111;
+  border-radius: 6px;
   background: #eef2e6;
   color: #111111;
 }
@@ -1671,7 +1680,7 @@ export default {
   flex-shrink: 0;
   width: min(82vw, 40vh, 360px);
   aspect-ratio: 1;
-  margin: 16px auto calc(16px + env(safe-area-inset-bottom));
+  margin: 18px auto 0;
   border: 1px solid #b5b5b5;
   border-radius: 50%;
   background: radial-gradient(circle, #f5f5f5 55%, #d9d9d9 100%);
