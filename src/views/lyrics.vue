@@ -2,9 +2,185 @@
   <transition name="slide-up">
     <div
       class="lyrics-page"
-      :class="{ 'no-lyric': noLyric }"
+      :class="{ 'no-lyric': noLyric, 'ipod-theme': playerTheme !== 'default' }"
       :data-theme="theme"
     >
+      <div v-if="playerTheme === 'ipod-classic'" class="ipod-classic">
+        <div class="ipod-device">
+          <div class="ipod-screen">
+            <div class="ipod-screen-header">
+              <img :src="imageUrl" class="ipod-cover" alt="" />
+              <div class="ipod-meta">
+                <div class="ipod-title">{{ track.name }}</div>
+                <div class="ipod-artist">{{
+                  track.ar && track.ar[0] ? track.ar[0].name : ''
+                }}</div>
+                <div class="ipod-album">{{
+                  track.al ? track.al.name : ''
+                }}</div>
+              </div>
+            </div>
+            <div class="ipod-progress" @click="seekIpod">
+              <div
+                class="ipod-progress-fill"
+                :style="{ width: ipodProgress * 100 + '%' }"
+              />
+            </div>
+            <div class="ipod-times">
+              <span>{{ formatTime(player.progress) || '0:00' }}</span>
+              <span>-{{ formatTime(ipodRemaining) || '0:00' }}</span>
+            </div>
+            <div ref="ipodClassicLyrics" class="ipod-lyrics">
+              <div
+                v-for="(line, index) in lyricToShow"
+                :key="index"
+                :class="[
+                  'ipod-lyric-line',
+                  { active: highlightLyricIndex === index },
+                ]"
+                @click="seekIpodLyric(line)"
+              >
+                <div>{{ line.content }}</div>
+                <div v-if="line.translation" class="ipod-lyric-translation">{{
+                  line.translation
+                }}</div>
+              </div>
+              <div
+                v-if="!lyricToShow || !lyricToShow.length"
+                class="ipod-lyric-line"
+                >暂无歌词</div
+              >
+            </div>
+          </div>
+          <div
+            class="ipod-wheel"
+            @pointerdown="wheelPointerDown"
+            @pointermove="wheelPointerMove"
+            @pointerup="wheelPointerUp"
+            @pointercancel="wheelPointerUp"
+          >
+            <span class="ipod-wheel-label ipod-wheel-menu">MENU</span>
+            <span class="ipod-wheel-label ipod-wheel-prev"
+              >|&#9664;&#9664;</span
+            >
+            <span class="ipod-wheel-label ipod-wheel-next"
+              >&#9654;&#9654;|</span
+            >
+            <span class="ipod-wheel-label ipod-wheel-play"
+              >&#9654;&#10074;&#10074;</span
+            >
+            <button
+              type="button"
+              class="ipod-wheel-center"
+              aria-label="播放或暂停"
+              @click.stop="wheelCenterClick"
+            />
+          </div>
+        </div>
+      </div>
+      <div v-if="playerTheme === 'ipod-touch'" class="ipod-touch">
+        <button type="button" class="ipod-touch-close" @click="toggleLyrics"
+          >&#8249; 关闭</button
+        >
+        <img :src="imageUrl" class="ipod-touch-cover" alt="" />
+        <div class="ipod-touch-title">{{ track.name }}</div>
+        <div class="ipod-touch-artist"
+          >{{ track.ar && track.ar[0] ? track.ar[0].name : '' }} -
+          {{ track.al ? track.al.name : '' }}</div
+        >
+        <div class="ipod-touch-progress" @click="seekIpod">
+          <div
+            class="ipod-touch-progress-fill"
+            :style="{ width: ipodProgress * 100 + '%' }"
+          />
+        </div>
+        <div class="ipod-touch-times">
+          <span>{{ formatTime(player.progress) || '0:00' }}</span>
+          <span>-{{ formatTime(ipodRemaining) || '0:00' }}</span>
+        </div>
+        <div class="ipod-touch-controls">
+          <button
+            type="button"
+            class="ipod-touch-small"
+            :class="{ active: player.shuffle }"
+            aria-label="随机播放"
+            @click="player.switchShuffle()"
+            >&#8646;</button
+          >
+          <button
+            type="button"
+            class="ipod-touch-prev"
+            aria-label="上一曲"
+            @click="playPrevTrack"
+            >|&#9664;&#9664;</button
+          >
+          <button
+            type="button"
+            class="ipod-touch-play"
+            aria-label="播放或暂停"
+            @click="playOrPause"
+            >{{ player.playing ? '&#10074;&#10074;' : '&#9654;' }}</button
+          >
+          <button
+            type="button"
+            class="ipod-touch-next"
+            aria-label="下一曲"
+            @click="playNextTrack"
+            >&#9654;&#9654;|</button
+          >
+          <button
+            type="button"
+            class="ipod-touch-small"
+            :class="{ active: player.repeatMode !== 'off' }"
+            aria-label="循环播放"
+            @click="player.switchRepeatMode()"
+            >&#8635;<span v-if="player.repeatMode === 'one'">1</span></button
+          >
+        </div>
+        <div class="ipod-touch-volume">
+          <span class="ipod-touch-volume-label">音量</span>
+          <input
+            v-model="volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            class="ipod-touch-volume-slider"
+            aria-label="音量"
+          />
+        </div>
+        <button
+          type="button"
+          class="ipod-touch-like"
+          :class="{ active: player.isCurrentTrackLiked }"
+          @click="likeATrack(track.id)"
+          >{{
+            player.isCurrentTrackLiked ? '&#10084;' : '&#9825;'
+          }}
+          喜欢</button
+        >
+        <div ref="ipodTouchLyrics" class="ipod-touch-lyrics">
+          <div
+            v-for="(line, index) in lyricToShow"
+            :key="index"
+            :class="[
+              'ipod-lyric-line',
+              { active: highlightLyricIndex === index },
+            ]"
+            @click="seekIpodLyric(line)"
+          >
+            <div>{{ line.content }}</div>
+            <div v-if="line.translation" class="ipod-lyric-translation">{{
+              line.translation
+            }}</div>
+          </div>
+          <div
+            v-if="!lyricToShow || !lyricToShow.length"
+            class="ipod-lyric-line"
+            >暂无歌词</div
+          >
+        </div>
+      </div>
       <div
         v-if="
           (settings.lyricsBackground === 'blur') |
@@ -343,6 +519,23 @@ export default {
     };
   },
   computed: {
+    playerTheme() {
+      return this.$store.state.settings.playerTheme || 'default';
+    },
+    clickSoundEnabled() {
+      return this.$store.state.settings.clickSound !== false;
+    },
+    ipodProgress() {
+      const duration = (this.track.dt || 0) / 1000;
+      if (!duration) {
+        return 0;
+      }
+      return Math.min(1, Math.max(0, this.player.progress / duration));
+    },
+    ipodRemaining() {
+      const duration = (this.track.dt || 0) / 1000;
+      return Math.max(0, duration - this.player.progress);
+    },
     ...mapState(['player', 'settings', 'showLyrics']),
     currentTrack() {
       return this.player.currentTrack;
@@ -473,6 +666,9 @@ export default {
         this.exitFullscreen();
       }
     },
+    highlightLyricIndex() {
+      this.scrollIpodLyrics();
+    },
   },
   created() {
     this.getLyric();
@@ -502,6 +698,180 @@ export default {
     clearInterval(this.lyricsInterval);
   },
   methods: {
+    playClickSound() {
+      if (!this.clickSoundEnabled) {
+        return;
+      }
+      try {
+        if (!this._clickAudioContext) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) {
+            return;
+          }
+          this._clickAudioContext = new AudioContext();
+        }
+        const context = this._clickAudioContext;
+        if (context.state === 'suspended') {
+          context.resume();
+        }
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = 'square';
+        oscillator.frequency.value = 2000;
+        gain.gain.setValueAtTime(0.05, context.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          context.currentTime + 0.02
+        );
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.03);
+      } catch (err) {
+        if (err) {
+          // Click sound is best-effort; ignore audio errors.
+        }
+      }
+    },
+    vibrateWheel() {
+      try {
+        if (navigator.vibrate) {
+          navigator.vibrate(10);
+        }
+      } catch (err) {
+        if (err) {
+          // Vibration is best-effort; ignore errors.
+        }
+      }
+    },
+    wheelClickFeedback() {
+      this.playClickSound();
+      this.vibrateWheel();
+    },
+    wheelAngleFromEvent(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - (rect.left + rect.width / 2);
+      const y = event.clientY - (rect.top + rect.height / 2);
+      return (Math.atan2(y, x) * 180) / Math.PI;
+    },
+    wheelPointerDown(event) {
+      if (
+        event.target &&
+        event.target.closest &&
+        event.target.closest('.ipod-wheel-center')
+      ) {
+        return;
+      }
+      this._wheelPointerId = event.pointerId;
+      this._wheelLastAngle = this.wheelAngleFromEvent(event);
+      this._wheelAccumulated = 0;
+      this._wheelDownTime = Date.now();
+      this._wheelDownX = event.clientX;
+      this._wheelDownY = event.clientY;
+      this._wheelMoved = false;
+      if (event.currentTarget.setPointerCapture) {
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch (err) {
+          if (err) {
+            // Ignore pointer capture errors.
+          }
+        }
+      }
+    },
+    wheelPointerMove(event) {
+      if (this._wheelPointerId !== event.pointerId) {
+        return;
+      }
+      const moved =
+        Math.abs(event.clientX - this._wheelDownX) +
+        Math.abs(event.clientY - this._wheelDownY);
+      if (moved > 10) {
+        this._wheelMoved = true;
+      }
+      const angle = this.wheelAngleFromEvent(event);
+      let delta = angle - this._wheelLastAngle;
+      delta = ((delta + 540) % 360) - 180;
+      this._wheelLastAngle = angle;
+      this._wheelAccumulated += delta;
+      const step = 30;
+      if (Math.abs(this._wheelAccumulated) >= step) {
+        const lines = Math.trunc(this._wheelAccumulated / step);
+        this._wheelAccumulated -= lines * step;
+        this.scrollIpodWheel(lines);
+        for (let i = 0; i < Math.abs(lines); i += 1) {
+          this.wheelClickFeedback();
+        }
+      }
+    },
+    wheelPointerUp(event) {
+      if (this._wheelPointerId !== event.pointerId) {
+        return;
+      }
+      this._wheelPointerId = null;
+      const duration = Date.now() - this._wheelDownTime;
+      if (!this._wheelMoved && duration < 300) {
+        const angle = this.wheelAngleFromEvent(event);
+        if (angle >= -135 && angle < -45) {
+          this.wheelClickFeedback();
+          this.toggleLyrics();
+        } else if (angle >= -45 && angle < 45) {
+          this.wheelClickFeedback();
+          this.playNextTrack();
+        } else if (angle >= 45 && angle < 135) {
+          this.wheelClickFeedback();
+          this.playOrPause();
+        } else {
+          this.wheelClickFeedback();
+          this.playPrevTrack();
+        }
+      }
+    },
+    wheelCenterClick() {
+      this.wheelClickFeedback();
+      this.playOrPause();
+    },
+    scrollIpodWheel(lines) {
+      const container =
+        this.$refs.ipodClassicLyrics || this.$refs.ipodTouchLyrics;
+      if (!container) {
+        return;
+      }
+      this._ipodManualUntil = Date.now() + 4000;
+      container.scrollTop += lines * 26;
+    },
+    scrollIpodLyrics() {
+      if (this._ipodManualUntil && Date.now() < this._ipodManualUntil) {
+        return;
+      }
+      const refs = [this.$refs.ipodClassicLyrics, this.$refs.ipodTouchLyrics];
+      refs.forEach(container => {
+        if (!container) {
+          return;
+        }
+        const active = container.querySelector('.ipod-lyric-line.active');
+        if (active) {
+          active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      });
+    },
+    seekIpod(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const ratio = Math.min(
+        1,
+        Math.max(0, (event.clientX - rect.left) / rect.width)
+      );
+      const duration = (this.track.dt || 0) / 1000;
+      if (!duration) {
+        return;
+      }
+      this.player.seek(ratio * duration);
+    },
+    seekIpodLyric(line) {
+      if (line && typeof line.time === 'number') {
+        this.player.seek(line.time);
+      }
+    },
     ...mapMutations(['toggleLyrics', 'updateModal']),
     ...mapActions(['likeATrack']),
     initDate() {
@@ -1163,5 +1533,302 @@ export default {
 .slide-fade-leave-to {
   transform: translateX(27vh);
   opacity: 0;
+}
+.lyrics-page.ipod-theme > .lyrics-page-bg,
+.lyrics-page.ipod-theme > .lyrics-page-content {
+  display: none;
+}
+.ipod-classic,
+.ipod-touch {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+.ipod-classic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(12px + env(safe-area-inset-top))
+    calc(16px + env(safe-area-inset-right))
+    calc(16px + env(safe-area-inset-bottom))
+    calc(16px + env(safe-area-inset-left));
+  background: #f2f2f2;
+}
+.ipod-device {
+  width: 100%;
+  max-width: 360px;
+  box-sizing: border-box;
+  padding: 18px 14px 22px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 55%, #e9e9e9 100%);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 #ffffff;
+}
+.ipod-screen {
+  padding: 10px;
+  border: 6px solid #111111;
+  border-radius: 6px;
+  background: #eef2e6;
+  color: #111111;
+}
+.ipod-screen-header {
+  display: flex;
+  gap: 10px;
+}
+.ipod-cover {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid #999999;
+}
+.ipod-meta {
+  flex: 1;
+  min-width: 0;
+}
+.ipod-title {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ipod-artist,
+.ipod-album {
+  font-size: 12px;
+  color: #333333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ipod-progress {
+  height: 6px;
+  margin-top: 10px;
+  border-radius: 3px;
+  background: #c8c8c8;
+  cursor: pointer;
+}
+.ipod-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: #222222;
+}
+.ipod-times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ipod-lyrics {
+  height: 180px;
+  margin-top: 8px;
+  overflow-y: auto;
+  text-align: center;
+}
+.ipod-lyric-line {
+  padding: 4px 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555555;
+  cursor: pointer;
+}
+.ipod-lyric-line.active {
+  color: #000000;
+  font-weight: 700;
+}
+.ipod-lyric-translation {
+  font-size: 11px;
+  color: #777777;
+}
+.ipod-wheel {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 22px auto 0;
+  border: 1px solid #b5b5b5;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f5f5f5 55%, #d9d9d9 100%);
+  box-shadow: inset 0 0 0 6px #ececec, 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ipod-wheel-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 84px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #c9c9c9;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff, #e6e6e6);
+  cursor: pointer;
+}
+.ipod-wheel-label {
+  position: absolute;
+  color: #666666;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.ipod-wheel-menu {
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+}
+.ipod-wheel-prev {
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ipod-wheel-next {
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ipod-wheel-play {
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+}
+.ipod-touch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  padding: calc(12px + env(safe-area-inset-top))
+    calc(20px + env(safe-area-inset-right))
+    calc(20px + env(safe-area-inset-bottom))
+    calc(20px + env(safe-area-inset-left));
+  background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+  color: #ffffff;
+  text-align: center;
+}
+.ipod-touch-close {
+  align-self: flex-start;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: #0a84ff;
+  font-size: 16px;
+  cursor: pointer;
+}
+.ipod-touch-cover {
+  width: min(280px, 72vw);
+  aspect-ratio: 1;
+  margin-top: 12px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+.ipod-touch-title {
+  margin-top: 14px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.ipod-touch-artist {
+  margin-top: 4px;
+  font-size: 15px;
+  color: #a1a1a6;
+}
+.ipod-touch-progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 18px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.ipod-touch-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: #ffffff;
+}
+.ipod-touch-times {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #a1a1a6;
+}
+.ipod-touch-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 18px;
+}
+.ipod-touch-controls button {
+  padding: 8px;
+  border: none;
+  background: none;
+  color: #ffffff;
+  font-size: 22px;
+  cursor: pointer;
+}
+.ipod-touch-controls .ipod-touch-play {
+  font-size: 34px;
+}
+.ipod-touch-controls button.active {
+  color: #0a84ff;
+}
+.ipod-touch-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+}
+.ipod-touch-volume-label {
+  font-size: 12px;
+  color: #a1a1a6;
+}
+.ipod-touch-volume-slider {
+  flex: 1;
+  accent-color: #ffffff;
+}
+.ipod-touch-like {
+  margin-top: 14px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: none;
+  color: #ffffff;
+  cursor: pointer;
+}
+.ipod-touch-like.active {
+  border-color: #ff375f;
+  color: #ff375f;
+}
+.ipod-touch-lyrics {
+  width: 100%;
+  margin-top: 18px;
+  padding-bottom: 24px;
+  text-align: center;
+}
+.ipod-touch-lyrics .ipod-lyric-line {
+  color: #8e8e93;
+}
+.ipod-touch-lyrics .ipod-lyric-line.active {
+  color: #ffffff;
+}
+@media (max-width: 380px) {
+  .ipod-wheel {
+    width: 220px;
+    height: 220px;
+  }
+  .ipod-lyrics {
+    height: 150px;
+  }
 }
 </style>

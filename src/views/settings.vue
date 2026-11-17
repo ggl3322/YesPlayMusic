@@ -248,6 +248,30 @@
         </div>
       </div>
       <div class="item">
+        <div class="title">播放器样式</div>
+        <div class="content">
+          <select v-model="playerTheme">
+            <option value="default">默认</option>
+            <option value="ipod-classic">经典 iPod</option>
+            <option value="ipod-touch">iPod touch</option>
+          </select>
+        </div>
+      </div>
+      <div class="item">
+        <div class="title">转盘咔唾声</div>
+        <div class="content">
+          <div class="toggle">
+            <input
+              id="click-sound"
+              v-model="clickSound"
+              type="checkbox"
+              name="click-sound"
+            />
+            <label for="click-sound" />
+          </div>
+        </div>
+      </div>
+      <div class="item">
         <div class="left">
           <div class="title"> {{ $t('settings.showLyricsTime') }} </div>
         </div>
@@ -1088,6 +1112,28 @@ export default {
       set(value) {
         this.$store.commit('updateSettings', {
           key: 'lyricsBackground',
+          value,
+        });
+      },
+    },
+    playerTheme: {
+      get() {
+        return this.settings.playerTheme || 'default';
+      },
+      set(value) {
+        this.$store.commit('updateSettings', {
+          key: 'playerTheme',
+          value,
+        });
+      },
+    },
+    clickSound: {
+      get() {
+        return this.settings.clickSound !== false;
+      },
+      set(value) {
+        this.$store.commit('updateSettings', {
+          key: 'clickSound',
           value,
         });
       },

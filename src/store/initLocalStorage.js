@@ -39,6 +39,8 @@ let localStorage = {
       port: null,
     },
     enableRealIP: false,
+    playerTheme: 'default',
+    clickSound: true,
     realIP: null,
     shortcuts: shortcuts,
   },
