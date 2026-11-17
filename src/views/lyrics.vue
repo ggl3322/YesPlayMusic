@@ -540,6 +540,10 @@ export default {
     currentTrack() {
       return this.player.currentTrack;
     },
+    track() {
+      return this.currentTrack || {};
+    },
+
     volume: {
       get() {
         return this.player.volume;
