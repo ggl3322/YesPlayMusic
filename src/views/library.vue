@@ -14,7 +14,7 @@
           class="liked-songs-background"
           :style="{
             backgroundImage: 'url(' + liked.playlists[0].coverImgUrl + ')',
-          }""
+          }"
         />
         <div class="bottom">
           <div class="titles">
