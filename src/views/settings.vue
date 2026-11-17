@@ -813,9 +813,9 @@
       <div class="footer">
         <p class="author"
           >MADE BY
-          <a href="http://github.com/qier222" target="_blank">QIER222</a></p
+          <a href="http://github.com/qier222" target="_blank">HLLL</a></p
         >
-        <p class="version">v{{ version }}</p>
+        <p class="version">V{{ version }}</p>
 
         <a
           v-if="!isElectron"
