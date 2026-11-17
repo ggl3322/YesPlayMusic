@@ -211,8 +211,9 @@ a {
   .section-one { flex-direction: column !important; }
   .section-one .songs { flex: none !important; width: 100% !important; margin-left: 0 !important; margin-top: 16px !important; }
   .liked-songs { flex: none !important; width: 100% !important; flex-direction: row !important; align-items: center !important; padding: 16px !important; }
-  .liked-songs .bottom { flex: none !important; margin-left: 12px !important; }
+  .liked-songs .bottom { flex: 1 1 auto !important; width: 100% !important; margin-left: 12px !important; }     .liked-songs .bottom button { flex-shrink: 0 !important; margin-left: auto !important; }
   .liked-songs .bottom .title { font-size: 18px !important; }
+  
   /* 歌词页底部控制栏：隐藏日期与封面，控制区通栏 */
   .lyrics-page .left-side .date, .lyrics-page .left-side .cover { display: none !important; }
   .lyrics-page .left-side .controls { max-width: none !important; width: 100% !important; margin-top: 0 !important; }
