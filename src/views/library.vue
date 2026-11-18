@@ -220,7 +220,7 @@ import { dailyTask } from '@/utils/common';
 import { isAccountLoggedIn } from '@/utils/auth';
 import { uploadSong } from '@/api/user';
 
-  import NProgress from 'nprogress';
+import NProgress from 'nprogress';
 import locale from '@/locale';
 
 import ContextMenu from '@/components/ContextMenu.vue';
