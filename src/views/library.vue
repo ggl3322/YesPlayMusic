@@ -284,18 +284,18 @@ export default {
     ...mapMutations(['updateModal', 'updateData']),
     loadData() {
       this.loadFailed = false;
+      const likedPlaylistPromise = this.$store.dispatch('fetchLikedPlaylist');
       if (this.liked.songsWithDetails.length > 0) {
         NProgress.done();
         this.show = true;
         this.$store.dispatch('fetchLikedSongsWithDetails');
       } else {
-        this.$store
-          .dispatch('fetchLikedSongsWithDetails')
+        likedPlaylistPromise
+          .then(() => this.$store.dispatch('fetchLikedSongsWithDetails'))
           .then(this.onLikedSongsLoaded)
           .catch(this.onLikedSongsFailed);
       }
       this.$store.dispatch('fetchLikedSongs');
-      this.$store.dispatch('fetchLikedPlaylist');
       this.$store.dispatch('fetchLikedAlbums');
       this.$store.dispatch('fetchLikedArtists');
       this.$store.dispatch('fetchLikedMVs');
@@ -310,7 +310,8 @@ export default {
     onLikedSongsFailed() {
       setTimeout(() => {
         this.$store
-          .dispatch('fetchLikedSongsWithDetails')
+          .dispatch('fetchLikedPlaylist')
+          .then(() => this.$store.dispatch('fetchLikedSongsWithDetails'))
           .then(this.onLikedSongsLoaded)
           .catch(this.onLikedSongsLoadFailed);
       }, 1000);
