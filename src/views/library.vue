@@ -102,13 +102,13 @@
           v-show="currentTab === 'playlists'"
           class="tab-button"
           @click="openAddPlaylistModal"
-        ><svg-icon icon-class="plus" />{{ $t('library.newPlayList') }}
+          ><svg-icon icon-class="plus" />{{ $t('library.newPlayList') }}
         </button>
         <button
           v-show="currentTab === 'cloudDisk'"
           class="tab-button"
           @click="selectUploadFiles"
-        ><svg-icon icon-class="arrow-up-alt" />{{ $t('library.uploadSongs') }}
+          ><svg-icon icon-class="arrow-up-alt" />{{ $t('library.uploadSongs') }}
         </button>
       </div>
 
