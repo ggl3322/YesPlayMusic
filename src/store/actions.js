@@ -86,41 +86,41 @@ export default {
       if (isAccountLoggedIn()) {
         return userLikedSongsIDs({ uid: state.data.user.userId }).then(
           result => {
-        if (result.ids) {
-          commit('updateLikedXXX', {
-            name: 'songs',
-            data: result.ids,
-          });
-        }
-      }
+            if (result.ids) {
+              commit('updateLikedXXX', {
+                name: 'songs',
+                data: result.ids,
+              });
+            }
+          }
         );
-    } else {
-      // TODO:搜索ID登录的用户
-    }
+      } else {
+        // TODO:搜索ID登录的用户
+      }
     });
   },
   fetchLikedSongsWithDetails: ({ state, commit }) => {
     return coalesceRequest('fetchLikedSongsWithDetails', () => {
-        return getPlaylistDetail(state.data.likedSongPlaylistID, true).then(
-          result => {
-            if (result.playlist?.trackIds?.length === 0) {
-              return new Promise(resolve => {
-                resolve();
-              });
-            }
-            return getTrackDetail(
-              result.playlist.trackIds
-                .slice(0, 12)
-                .map(t => t.id)
-                .join(',')
-            ).then(result => {
-              commit('updateLikedXXX', {
-                name: 'songsWithDetails',
-                data: result.songs,
-              });
+      return getPlaylistDetail(state.data.likedSongPlaylistID, true).then(
+        result => {
+          if (result.playlist?.trackIds?.length === 0) {
+            return new Promise(resolve => {
+              resolve();
             });
           }
-        );
+          return getTrackDetail(
+            result.playlist.trackIds
+              .slice(0, 12)
+              .map(t => t.id)
+              .join(',')
+          ).then(result => {
+            commit('updateLikedXXX', {
+              name: 'songsWithDetails',
+              data: result.songs,
+            });
+          });
+        }
+      );
     });
   },
   fetchLikedPlaylist: ({ state, commit }) => {
@@ -148,7 +148,7 @@ export default {
         // TODO:搜索ID登录的用户
       }
     });
-},
+  },
   fetchLikedAlbums: ({ commit }) => {
     if (!isAccountLoggedIn()) return;
     return likedAlbums({ limit: 2000 }).then(result => {
