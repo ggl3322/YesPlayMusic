@@ -270,10 +270,6 @@ export default {
         if (!isLooseLoggedIn()) {
           this.$store.dispatch('fetchLikedPlaylist');
         }
-        this.$store.dispatch('fetchLikedAlbums');
-        this.$store.dispatch('fetchLikedArtists');
-        this.$store.dispatch('fetchLikedMVs');
-        this.$store.dispatch('fetchCloudDisk');
       }
     },
     handleScroll() {

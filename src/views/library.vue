@@ -240,6 +240,13 @@ export default {
 
       currentTab: 'playlists',
       playHistoryMode: 'week',
+      loadedTabs: {
+        albums: false,
+        artists: false,
+        mvs: false,
+        cloudDisk: false,
+        playHistory: false,
+      },
     };
   },
   computed: {
@@ -296,11 +303,25 @@ export default {
           .catch(this.onLikedSongsFailed);
       }
       this.$store.dispatch('fetchLikedSongs');
-      this.$store.dispatch('fetchLikedAlbums');
-      this.$store.dispatch('fetchLikedArtists');
-      this.$store.dispatch('fetchLikedMVs');
-      this.$store.dispatch('fetchCloudDisk');
-      this.$store.dispatch('fetchPlayHistory');
+      this.loadTabData(this.currentTab);
+    },
+    // 非可见标签页首次打开时再加载数据，之后切换不再重复请求
+    loadTabData(tab) {
+      const tabActions = {
+        albums: 'fetchLikedAlbums',
+        artists: 'fetchLikedArtists',
+        mvs: 'fetchLikedMVs',
+        cloudDisk: 'fetchCloudDisk',
+        playHistory: 'fetchPlayHistory',
+      };
+      const action = tabActions[tab];
+      if (!action || this.loadedTabs[tab]) {
+        return;
+      }
+      this.loadedTabs[tab] = true;
+      this.$store.dispatch(action).catch(() => {
+        this.loadedTabs[tab] = false;
+      });
     },
     onLikedSongsLoaded() {
       NProgress.done();
@@ -346,6 +367,7 @@ export default {
         return;
       }
       this.currentTab = tab;
+      this.loadTabData(tab);
       this.$parent.$refs.main.scrollTo({ top: 375, behavior: 'smooth' });
     },
     goToLikedSongsList() {
