@@ -9,8 +9,7 @@
         class="avatar"
         :src="data.user.avatarUrl | resizeImage"
         loading="lazy"
-      />
-      {{ data.user.nickname }}{{ $t('library.sLibrary') }}
+      />{{ data.user.nickname }}{{ $t('library.sLibrary') }}
     </h1>
     <div class="section-one">
       <div class="liked-songs" @click="goToLikedSongsList">
@@ -103,15 +102,13 @@
           v-show="currentTab === 'playlists'"
           class="tab-button"
           @click="openAddPlaylistModal"
-        >
-          <svg-icon icon-class="plus" />{{ $t('library.newPlayList') }}
+        ><svg-icon icon-class="plus" />{{ $t('library.newPlayList') }}
         </button>
         <button
           v-show="currentTab === 'cloudDisk'"
           class="tab-button"
           @click="selectUploadFiles"
-        >
-          <svg-icon icon-class="arrow-up-alt" />{{ $t('library.uploadSongs') }}
+        ><svg-icon icon-class="arrow-up-alt" />{{ $t('library.uploadSongs') }}
         </button>
       </div>
 
@@ -222,8 +219,10 @@ import { mapActions, mapMutations, mapState } from 'vuex';
 import { dailyTask } from '@/utils/common';
 import { isAccountLoggedIn } from '@/utils/auth';
 import { uploadSong } from '@/api/user';
-import NProgress from 'nprogress';
+
+  import NProgress from 'nprogress';
 import locale from '@/locale';
+
 import ContextMenu from '@/components/ContextMenu.vue';
 import TrackList from '@/components/TrackList.vue';
 import CoverRow from '@/components/CoverRow.vue';
@@ -429,6 +428,7 @@ h1 {
   flex-direction: column;
   transition: all 0.4s;
   box-sizing: border-box;
+
   position: relative;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.45);
