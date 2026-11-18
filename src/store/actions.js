@@ -122,7 +122,6 @@ export default {
           }
         );
     });
-  });
   },
   fetchLikedPlaylist: ({ state, commit }) => {
     return coalesceRequest('fetchLikedPlaylist', () => {
