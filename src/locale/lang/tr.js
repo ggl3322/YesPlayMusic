@@ -165,13 +165,6 @@ export default {
       light: 'Aydınlık',
       dark: 'Karanlık',
     },
-    themeColor: {
-      text: 'Tema rengi',
-      default: 'Orijinal',
-      sunset: 'Gün batımı geçişi',
-      ocean: 'Okyanus geçişi',
-      forest: 'Orman geçişi',
-    },
     trayIcon: {
       text: 'Tepsi Simgesi Rengi',
       auto: 'Otomatik',
