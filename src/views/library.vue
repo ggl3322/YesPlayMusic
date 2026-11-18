@@ -291,11 +291,18 @@ export default {
     ...mapMutations(['updateModal', 'updateData']),
     loadData() {
       this.loadFailed = false;
-      const likedPlaylistPromise = this.$store.dispatch('fetchLikedPlaylist');
+      const likedPlaylistPromise = Promise.resolve(
+        this.$store.dispatch('fetchLikedPlaylist')
+      );
       if (this.liked.songsWithDetails.length > 0) {
         NProgress.done();
         this.show = true;
-        this.$store.dispatch('fetchLikedSongsWithDetails');
+        this.$store.dispatch('fetchLikedSongsWithDetails').catch(() => {});
+      } else if (this.data.likedSongPlaylistID) {
+        this.$store
+          .dispatch('fetchLikedSongsWithDetails')
+          .then(this.onLikedSongsLoaded)
+          .catch(this.onLikedSongsFailed);
       } else {
         likedPlaylistPromise
           .then(() => this.$store.dispatch('fetchLikedSongsWithDetails'))
@@ -330,8 +337,7 @@ export default {
     // 首次加载失败时 1 秒后重试一次，仍失败则显示页面并提示重试
     onLikedSongsFailed() {
       setTimeout(() => {
-        this.$store
-          .dispatch('fetchLikedPlaylist')
+        Promise.resolve(this.$store.dispatch('fetchLikedPlaylist'))
           .then(() => this.$store.dispatch('fetchLikedSongsWithDetails'))
           .then(this.onLikedSongsLoaded)
           .catch(this.onLikedSongsLoadFailed);
