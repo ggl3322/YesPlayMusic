@@ -27,7 +27,7 @@ export default {
     },
     color: {
       type: String,
-      default: 'blue',
+      default: 'primary',
     },
     backgroundColor: {
       type: String,
