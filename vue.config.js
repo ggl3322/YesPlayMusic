@@ -25,9 +25,9 @@ module.exports = {
     iconPaths: {
       favicon32: 'img/icons/favicon-32x32.png',
     },
-    themeColor: '#335eea',
+    themeColor: '#000000',
     manifestOptions: {
-      background_color: '#335eea',
+      background_color: '#000000',
     },
     // workboxOptions: {
     //   swSrc: "dev/sw.js",
