@@ -14,6 +14,26 @@ import {
   userAccount,
 } from '@/api/user';
 
+// 发起中的同名请求只发一次，直接返回同一个 Promise
+const inFlightRequests = {};
+function coalesceRequest(key, run) {
+  if (inFlightRequests[key]) {
+    return inFlightRequests[key];
+  }
+  const promise = run();
+  if (!promise || typeof promise.then !== 'function') {
+    return promise;
+  }
+  inFlightRequests[key] = promise;
+  const clearInFlightRequest = () => {
+    if (inFlightRequests[key] === promise) {
+      delete inFlightRequests[key];
+    }
+  };
+  promise.then(clearInFlightRequest, clearInFlightRequest);
+  return promise;
+}
+
 export default {
   showToast({ state, commit }, text) {
     if (state.toast.timer !== null) {
@@ -61,66 +81,75 @@ export default {
       });
   },
   fetchLikedSongs: ({ state, commit }) => {
-    if (!isLooseLoggedIn()) return;
-    if (isAccountLoggedIn()) {
-      return userLikedSongsIDs({ uid: state.data.user.userId }).then(result => {
+    return coalesceRequest('fetchLikedSongs', () => {
+      if (!isLooseLoggedIn()) return;
+      if (isAccountLoggedIn()) {
+        return userLikedSongsIDs({ uid: state.data.user.userId }).then(
+          result => {
         if (result.ids) {
           commit('updateLikedXXX', {
             name: 'songs',
             data: result.ids,
           });
         }
-      });
+      }
+        );
     } else {
       // TODO:搜索ID登录的用户
     }
+    });
   },
   fetchLikedSongsWithDetails: ({ state, commit }) => {
-    return getPlaylistDetail(state.data.likedSongPlaylistID, true).then(
-      result => {
-        if (result.playlist?.trackIds?.length === 0) {
-          return new Promise(resolve => {
-            resolve();
-          });
-        }
-        return getTrackDetail(
-          result.playlist.trackIds
-            .slice(0, 12)
-            .map(t => t.id)
-            .join(',')
-        ).then(result => {
-          commit('updateLikedXXX', {
-            name: 'songsWithDetails',
-            data: result.songs,
-          });
-        });
-      }
-    );
+    return coalesceRequest('fetchLikedSongsWithDetails', () => {
+        return getPlaylistDetail(state.data.likedSongPlaylistID, true).then(
+          result => {
+            if (result.playlist?.trackIds?.length === 0) {
+              return new Promise(resolve => {
+                resolve();
+              });
+            }
+            return getTrackDetail(
+              result.playlist.trackIds
+                .slice(0, 12)
+                .map(t => t.id)
+                .join(',')
+            ).then(result => {
+              commit('updateLikedXXX', {
+                name: 'songsWithDetails',
+                data: result.songs,
+              });
+            });
+          }
+        );
+    });
+  });
   },
   fetchLikedPlaylist: ({ state, commit }) => {
-    if (!isLooseLoggedIn()) return;
-    if (isAccountLoggedIn()) {
-      return userPlaylist({
-        uid: state.data.user?.userId,
-        limit: 2000, // 最多只加载2000个歌单（等有用户反馈问题再修）
-        timestamp: new Date().getTime(),
-      }).then(result => {
-        if (result.playlist) {
-          commit('updateLikedXXX', {
-            name: 'playlists',
-            data: result.playlist,
-          });
-          // 更新用户”喜欢的歌曲“歌单ID
-          commit('updateData', {
-            key: 'likedSongPlaylistID',
-            value: result.playlist[0].id,
-          });
-        }
-      });
-    } else {
-      // TODO:搜索ID登录的用户
-    }
-  },
+    return coalesceRequest('fetchLikedPlaylist', () => {
+      if (!isLooseLoggedIn()) return;
+      if (isAccountLoggedIn()) {
+        return userPlaylist({
+          uid: state.data.user?.userId,
+          limit: 2000, // 最多只加载2000个歌单（等有用户反馈问题再修）
+          timestamp: new Date().getTime(),
+        }).then(result => {
+          if (result.playlist) {
+            commit('updateLikedXXX', {
+              name: 'playlists',
+              data: result.playlist,
+            });
+            // 更新用户”喜欢的歌曲“歌单ID
+            commit('updateData', {
+              key: 'likedSongPlaylistID',
+              value: result.playlist[0].id,
+            });
+          }
+        });
+      } else {
+        // TODO:搜索ID登录的用户
+      }
+    });
+},
   fetchLikedAlbums: ({ commit }) => {
     if (!isAccountLoggedIn()) return;
     return likedAlbums({ limit: 2000 }).then(result => {
