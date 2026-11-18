@@ -56,27 +56,6 @@
           </select>
         </div>
       </div>
-      <div class="item">
-        <div class="left">
-          <div class="title"> {{ $t('settings.themeColor.text') }} </div>
-        </div>
-        <div class="right">
-          <select v-model="themeColor">
-            <option value="default">
-              {{ $t('settings.themeColor.default') }}
-            </option>
-            <option value="sunset">
-              {{ $t('settings.themeColor.sunset') }}
-            </option>
-            <option value="ocean">
-              {{ $t('settings.themeColor.ocean') }}
-            </option>
-            <option value="forest">
-              {{ $t('settings.themeColor.forest') }}
-            </option>
-          </select>
-        </div>
-      </div>
       <div v-if="isElectron" class="item">
         <div class="left">
           <div class="title"> {{ $t('settings.trayIcon.text') }} </div>
@@ -837,7 +816,6 @@ import { isLooseLoggedIn, doLogout } from '@/utils/auth';
 import { auth as lastfmAuth } from '@/api/lastfm';
 import {
   changeAppearance,
-  changeThemeColor,
   bytesToSize,
 } from '@/utils/common';
 import { countDBSize, clearDB } from '@/utils/db';
@@ -966,28 +944,6 @@ export default {
           value,
         });
         changeAppearance(value);
-        const resolvedAppearance =
-          value === 'auto'
-            ? document.body?.getAttribute('data-theme') || 'light'
-            : value;
-        changeThemeColor(this.themeColor, resolvedAppearance);
-      },
-    },
-    themeColor: {
-      get() {
-        if (this.settings.themeColor === undefined) return 'default';
-        return this.settings.themeColor;
-      },
-      set(value) {
-        this.$store.commit('updateSettings', {
-          key: 'themeColor',
-          value,
-        });
-        const resolvedAppearance =
-          this.settings.appearance === 'auto'
-            ? document.body?.getAttribute('data-theme') || 'light'
-            : this.settings.appearance;
-        changeThemeColor(value, resolvedAppearance);
       },
     },
     trayIconTheme: {
@@ -1650,8 +1606,8 @@ h3 {
       }
       &:hover {
         opacity: 1;
-        background: #eaeffd;
-        color: #335eea;
+        background: var(--color-primary-bg);
+        color: var(--color-primary);
       }
       &:active {
         opacity: 1;
