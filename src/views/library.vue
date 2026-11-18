@@ -402,7 +402,7 @@ h1 {
 
   position: relative;
   overflow: hidden;
-  background-color: rgba(20, 24, 38, 0.45);
+  background-color: rgba(0, 0, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   @supports (
@@ -419,7 +419,7 @@ h1 {
     left: 0;
     z-index: 1;
     content: '';
-    background-color: rgba(20, 24, 38, 0.35);
+    background-color: rgba(0, 0, 0, 0.35);
     background-image: linear-gradient(
       rgba(255, 255, 255, 0.25),
       rgba(255, 255, 255, 0)
