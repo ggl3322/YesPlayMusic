@@ -219,6 +219,7 @@ import { mapActions, mapMutations, mapState } from 'vuex';
 import { dailyTask } from '@/utils/common';
 import { isAccountLoggedIn } from '@/utils/auth';
 import { uploadSong } from '@/api/user';
+import { readLibraryCache } from '@/store/actions';
 
 import NProgress from 'nprogress';
 import locale from '@/locale';
@@ -237,6 +238,7 @@ export default {
       show: false,
       likedSongs: [],
       loadFailed: false,
+      hasCachedContent: false,
 
       currentTab: 'playlists',
       playHistoryMode: 'week',
@@ -279,6 +281,11 @@ export default {
     setTimeout(() => {
       if (!this.show) NProgress.start();
     }, 1000);
+    // 缓存优先：冷启动先用上次缓存渲染首屏，后台再刷新
+    if (this.restoreLibraryCache()) {
+      NProgress.done();
+      this.show = true;
+    }
     this.loadData();
   },
   activated() {
@@ -288,13 +295,42 @@ export default {
   },
   methods: {
     ...mapActions(['showToast']),
-    ...mapMutations(['updateModal', 'updateData']),
+    ...mapMutations(['updateModal', 'updateData', 'updateLikedXXX']),
+    // 从 localStorage 恢复首屏缓存：有缓存时立即渲染，后台再刷新
+    restoreLibraryCache() {
+      const cache = readLibraryCache();
+      if (!cache || cache.playlists.length === 0) {
+        return false;
+      }
+      this.hasCachedContent = true;
+      this.updateLikedXXX({ name: 'playlists', data: cache.playlists });
+      if (cache.songsWithDetails.length > 0) {
+        this.updateLikedXXX({
+          name: 'songsWithDetails',
+          data: cache.songsWithDetails,
+        });
+      }
+      if (Array.isArray(cache.songs) && cache.songs.length > 0) {
+        this.updateLikedXXX({ name: 'songs', data: cache.songs });
+      }
+      return true;
+    },
     loadData() {
       this.loadFailed = false;
       const likedPlaylistPromise = Promise.resolve(
         this.$store.dispatch('fetchLikedPlaylist')
       );
+      // 歌单先回：先显示“我喜欢的音乐”卡片，曲目详情随后补齐
+      likedPlaylistPromise
+        .then(() => {
+          if (this.liked.playlists.length > 0) {
+            NProgress.done();
+            this.show = true;
+          }
+        })
+        .catch(() => {});
       if (this.liked.songsWithDetails.length > 0) {
+        this.hasCachedContent = true;
         NProgress.done();
         this.show = true;
         this.$store.dispatch('fetchLikedSongsWithDetails').catch(() => {});
@@ -346,6 +382,10 @@ export default {
     onLikedSongsLoadFailed() {
       NProgress.done();
       this.show = true;
+      // 缓存内容已在屏时静默失败，不用失败横幅遮挡已显示的页面
+      if (this.hasCachedContent) {
+        return;
+      }
       this.loadFailed = true;
       this.showToast('音乐库加载失败，请点击重试');
     },
