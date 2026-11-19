@@ -34,6 +34,40 @@ function coalesceRequest(key, run) {
   return promise;
 }
 
+// 音乐库首屏缓存：冷启动先从 localStorage 恢复首屏内容，后台再刷新
+const LIBRARY_CACHE_KEY = 'libraryCache';
+
+export function readLibraryCache() {
+  try {
+    const cache = JSON.parse(localStorage.getItem(LIBRARY_CACHE_KEY));
+    if (
+      cache &&
+      Array.isArray(cache.playlists) &&
+      Array.isArray(cache.songsWithDetails)
+    ) {
+      return cache;
+    }
+  } catch (e) {
+    // 缓存损坏或不可用时忽略，走网络加载
+  }
+  return null;
+}
+
+function saveLibraryCache(patch) {
+  try {
+    const prev = readLibraryCache() || {};
+    const cache = {
+      playlists: patch.playlists || prev.playlists || [],
+      songsWithDetails: patch.songsWithDetails || prev.songsWithDetails || [],
+      songs: patch.songs || prev.songs || [],
+      savedAt: Date.now(),
+    };
+    localStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    // 存储空间不足等错误不影响正常加载
+  }
+}
+
 export default {
   showToast({ state, commit }, text) {
     if (state.toast.timer !== null) {
@@ -91,6 +125,7 @@ export default {
                 name: 'songs',
                 data: result.ids,
               });
+              saveLibraryCache({ songs: result.ids });
             }
           }
         );
@@ -118,6 +153,7 @@ export default {
               name: 'songsWithDetails',
               data: result.songs,
             });
+            saveLibraryCache({ songsWithDetails: result.songs });
           });
         }
       );
@@ -137,6 +173,7 @@ export default {
               name: 'playlists',
               data: result.playlist,
             });
+            saveLibraryCache({ playlists: result.playlist });
             // 更新用户”喜欢的歌曲“歌单ID
             commit('updateData', {
               key: 'likedSongPlaylistID',
