@@ -1,0 +1,25 @@
+name: keep-api-warm
+
+# 目的：让 Vercel 上的网易云 API Serverless 函数保持热态。
+# 冷启动实测约 7 秒，是「点开音乐要等几秒」的主因之一（尤其是点播放时的 /song/url）。
+# 每 5 分钟打一次 /personalized，函数就不会休眠到冷启动状态。
+
+on:
+  schedule:
+    # GitHub 最小间隔 5 分钟；实际可能延迟几分钟，够用了
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: ping personalized
+        run: |
+          curl -sS -m 20 -o /dev/null -w "personalized  %{http_code}  %{time_total}s\n" \
+            "https://api-enhanced-beryl-seven.vercel.app/personalized?limit=1"
+      - name: ping toplist
+        run: |
+          curl -sS -m 20 -o /dev/null -w "toplist       %{http_code}  %{time_total}s\n" \
+            "https://api-enhanced-beryl-seven.vercel.app/toplist"
