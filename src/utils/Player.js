@@ -14,6 +14,11 @@ import { decode as base642Buffer } from '@/utils/base64';
 
 const PLAY_PAUSE_FADE_DURATION = 200;
 
+// 网页端播放地址缓存：同一首歌 5 分钟内重复播放不再请求 /song/url。
+// 网易云返回的播放地址有效期约 20 分钟，取 5 分钟保证安全。
+const TRACK_SOURCE_TTL = 5 * 60 * 1000;
+const trackSourceCache = new Map();
+
 const INDEX_IN_PLAY_NEXT = -1;
 
 /**
@@ -417,12 +422,20 @@ export default class {
   }
   _getAudioSourceFromNetease(track) {
     if (isAccountLoggedIn()) {
+      const cached = trackSourceCache.get(String(track.id));
+      if (cached && cached.expires > Date.now()) {
+        return Promise.resolve(cached.url);
+      }
       return getMP3(track.id)
         .then(result => {
           if (!result.data[0]) return null;
           if (!result.data[0].url) return null;
           if (result.data[0].freeTrialInfo !== null) return null; // 跳过只能试听的歌曲
           const source = result.data[0].url.replace(/^http:/, 'https:');
+          trackSourceCache.set(String(track.id), {
+            url: source,
+            expires: Date.now() + TRACK_SOURCE_TTL,
+          });
           if (store.state.settings.automaticallyCacheSongs) {
             cacheTrackSource(track, source, result.data[0].br);
           }
@@ -521,6 +534,11 @@ export default class {
     if (autoplay && this._currentTrack.name) {
       this._scrobble(this.currentTrack, this._howler?.seek());
     }
+    // 网页端：把「取播放地址」与「取歌曲详情」并行发起，
+    // 点击到出声的等待从「两次串行请求」缩短为「一次」。
+    // Electron 端保持原逻辑（unblock 音源依赖完整 track 信息）。
+    const preloadedSource =
+      process.env.IS_ELECTRON === true ? null : this._getAudioSource({ id });
     return getTrackDetail(id)
       .then(data => {
         const track = data.songs && data.songs[0];
@@ -533,7 +551,8 @@ export default class {
           track,
           autoplay,
           true,
-          ifUnplayableThen
+          ifUnplayableThen,
+          preloadedSource
         );
       })
       .then(replaced => {
@@ -572,9 +591,11 @@ export default class {
     track,
     autoplay,
     isCacheNextTrack,
-    ifUnplayableThen = UNPLAYABLE_CONDITION.PLAY_NEXT_TRACK
+    ifUnplayableThen = UNPLAYABLE_CONDITION.PLAY_NEXT_TRACK,
+    preloadedSource = null
   ) {
-    return this._getAudioSource(track).then(source => {
+    const sourcePromise = preloadedSource ?? this._getAudioSource(track);
+    return sourcePromise.then(source => {
       if (source) {
         let replaced = false;
         if (track.id === this.currentTrackID) {
