@@ -816,6 +816,7 @@ import { isLooseLoggedIn, doLogout } from '@/utils/auth';
 import { auth as lastfmAuth } from '@/api/lastfm';
 import { changeAppearance, bytesToSize } from '@/utils/common';
 import { countDBSize, clearDB } from '@/utils/db';
+import request from '@/utils/request';
 import pkg from '../../package.json';
 
 const electron =
@@ -1403,6 +1404,9 @@ export default {
       });
     },
     clearCache() {
+      // 同时清掉 request.js 新增的只读接口内存缓存，
+      // 否则清完缓存仍可能读到旧数据（歌词最长缓存 30 分钟）。
+      request.clearCache();
       clearDB().then(() => {
         this.countDBSize();
       });

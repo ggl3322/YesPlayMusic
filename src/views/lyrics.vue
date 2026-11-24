@@ -1148,7 +1148,6 @@ export default {
   position: absolute;
   height: 100vh;
   height: 100dvh;
-  height: 100dvh;
   width: 100vw;
   width: 100%;
 
@@ -1193,7 +1192,6 @@ export default {
 .gradient-background {
   position: absolute;
   height: 100vh;
-  height: 100dvh;
   height: 100dvh;
   width: 100vw;
   width: 100%;

@@ -114,7 +114,9 @@ export default {
   methods: {
     loadData() {
       setTimeout(() => {
-        if (!this.show) NProgress.start();
+        // show 现在初始就是 true，原条件恒为 false，进度条永远不会出现；
+        // 改为「推荐歌单还没回来」时才显示。
+        if (this.recommendPlaylist.items.length === 0) NProgress.start();
       }, 1000);
       getRecommendPlayList(10, false).then(items => {
         this.recommendPlaylist.items = items;
