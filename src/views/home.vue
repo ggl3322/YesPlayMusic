@@ -86,7 +86,8 @@ export default {
   data() {
     return {
       // 原来这里是 false，整页要等 /personalized 返回后才 v-show 出来，
-      // 冷启动时会白屏好几秒。改成一开始就渲染骨架（标题 + 空行），
+      // 冷启动时会白屏好几秒。改成一开始就渲染标题行（CoverRow 没有空态占位，
+      // 数据未到时下面就是空白，所以这不算骨架屏），
       // 数据回来后再填充封面，体感上"立刻有页面"。
       show: true,
       recommendPlaylist: { items: [] },

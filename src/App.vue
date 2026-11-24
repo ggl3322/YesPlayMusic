@@ -88,8 +88,9 @@ import { ipcRenderer } from './electron/ipcRenderer';
 import { isAccountLoggedIn, isLooseLoggedIn } from '@/utils/auth';
 import { mapState } from 'vuex';
 
-// 歌词页体积不小（还带着取色库），只有点了「歌词」才会用到，
-// 改成异步组件，让它从首屏包里移出去。
+// 歌词页体积不小（还带着取色库），拆成独立 chunk，从首屏主包里移出去。
+// 注意：模板里用的是 v-show，组件首次渲染就会触发这次 import，
+// 所以这个 chunk 仍会随首屏并行下载；省下的是主包体积与解析时间，不是请求。
 const Lyrics = () =>
   import(/* webpackChunkName: "view-lyrics" */ '@/views/lyrics.vue');
 
