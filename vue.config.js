@@ -69,6 +69,20 @@ module.exports = {
     },
   },
   chainWebpack(config) {
+    // 歌词页 chunk 只有点了歌词才用得上，把它从首屏预取里排除；
+    // 其余路由 chunk 仍保持 prefetch，切页体验不变。
+    // 注意：本项目配了 pages，vue-cli 走多页分支，插件名是 prefetch-<pageName>。
+    Object.keys(config.plugins.entries())
+      .filter(name => name.startsWith('prefetch'))
+      .forEach(name => {
+        config.plugin(name).tap(options => {
+          const opts = options[0] || {};
+          opts.fileBlacklist = (opts.fileBlacklist || []).concat(/view-lyrics/);
+          options[0] = opts;
+          return options;
+        });
+      });
+
     config.module.rules.delete('svg');
     config.module.rule('svg').exclude.add(resolve('src/assets/icons')).end();
     config.module

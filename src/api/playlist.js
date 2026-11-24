@@ -27,7 +27,7 @@ export function dailyRecommendPlaylist(params) {
     url: '/recommend/resource',
     method: 'get',
     params: {
-      params,
+      ...(params || {}),
       timestamp: Date.now(),
     },
   });

@@ -71,7 +71,7 @@
       <ModalAddTrackToPlaylist v-if="isAccountLoggedIn" />
       <ModalNewPlaylist v-if="isAccountLoggedIn" />
       <transition v-if="enablePlayer" name="slide-up">
-        <Lyrics v-show="showLyrics" />
+        <Lyrics v-if="lyricsOpened" v-show="showLyrics" />
       </transition>
     </template>
   </div>
@@ -122,6 +122,8 @@ export default {
       pinLockRemaining: 0,
       pinLockTimer: null,
       pinKeys: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+      // 歌词页是 33KB 的异步 chunk，只有真正点开过歌词才挂载它
+      lyricsOpened: false,
     };
   },
   computed: {
@@ -153,6 +155,16 @@ export default {
     },
     pinLocked() {
       return this.pinLockRemaining > 0;
+    },
+  },
+  watch: {
+    // 首次打开后保持挂载，只用 v-show 控制显隐，这样歌词页的滚动位置、
+    // 当前行高亮这些状态在来回切换时不会丢。
+    showLyrics: {
+      immediate: true,
+      handler(visible) {
+        if (visible) this.lyricsOpened = true;
+      },
     },
   },
   created() {

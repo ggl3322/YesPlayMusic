@@ -118,17 +118,15 @@ export default {
     return coalesceRequest('fetchLikedSongs', () => {
       if (!isLooseLoggedIn()) return;
       if (isAccountLoggedIn()) {
-        return userLikedSongsIDs({ uid: state.data.user.userId }).then(
-          result => {
-            if (result.ids) {
-              commit('updateLikedXXX', {
-                name: 'songs',
-                data: result.ids,
-              });
-              saveLibraryCache({ songs: result.ids });
-            }
+        return userLikedSongsIDs(state.data.user.userId).then(result => {
+          if (result.ids) {
+            commit('updateLikedXXX', {
+              name: 'songs',
+              data: result.ids,
+            });
+            saveLibraryCache({ songs: result.ids });
           }
-        );
+        });
       } else {
         // TODO:搜索ID登录的用户
       }
