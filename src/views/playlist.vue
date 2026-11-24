@@ -448,7 +448,9 @@ export default {
     },
     loadData(id, next = undefined) {
       this.id = id;
-      getPlaylistDetail(this.id, true)
+      // 页面进入不再强制刷新：60 秒内的重复进入直接复用上一次的歌单详情。
+      // 之前每次进都重拉一次（约 950KB）；显式刷新仍用 getPlaylistDetail(id, true)。
+      getPlaylistDetail(this.id)
         .then(data => {
           this.playlist = data.playlist;
           this.tracks = data.playlist.tracks;

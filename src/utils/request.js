@@ -36,6 +36,7 @@ const cacheRules = [
   ['/personalized', 30 * 1000],
   ['/recommend/songs', 30 * 1000],
   ['/toplist', 5 * 60 * 1000],
+  ['/top/playlist', 5 * 60 * 1000],
   ['/album/new', 10 * 60 * 1000],
   ['/playlist/detail', 60 * 1000],
   ['/song/detail', 10 * 60 * 1000],
@@ -61,12 +62,27 @@ function isCacheable(config) {
   return Boolean(matchRule(config.url));
 }
 
+// 缓存键里要忽略的“易变参数”。
+// 调用方习惯加 timestamp: Date.now() 来要求“别给旧数据”，这个值每次都不一样，
+// 一旦算进键里，同一个接口就永远命中不了（歌单详情曾因此每次都重新拉 ~950KB）。
+const VOLATILE_PARAMS = new Set(['timestamp']);
+
 function cacheKeyOf(config) {
   const params = config.params || {};
   const parts = Object.keys(params)
+    .filter(key => !VOLATILE_PARAMS.has(key))
     .sort()
     .map(key => `${key}=${params[key]}`);
   return `${config.url}?${parts.join('&')}`;
+}
+
+/**
+ * noCache 语义：请求里带 timestamp 表示“这次要最新的”。
+ * 这样的请求不读缓存，但结果仍然写回缓存，既尊重调用方的刷新意图，
+ * 又不会在内存里留下一堆 950KB 的过期副本。
+ */
+function isForcedRefresh(config) {
+  return Boolean(config.params && config.params.timestamp);
 }
 
 function makeResponse(data, config) {
@@ -130,7 +146,7 @@ service.interceptors.request.use(function (config) {
     config.params.proxy = `${proxy.protocol}://${proxy.server}:${proxy.port}`;
   }
 
-  if (isCacheable(config)) {
+  if (isCacheable(config) && !isForcedRefresh(config)) {
     const key = cacheKeyOf(config);
     const cached = memoryCache.get(key);
     if (cached && Date.now() - cached.ts < matchRule(config.url)[1]) {

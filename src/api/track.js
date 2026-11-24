@@ -78,18 +78,31 @@ export function getTrackDetail(ids) {
  * 说明 : 调用此接口 , 传入音乐 id 可获得对应音乐的歌词 ( 不需要登录 )
  * @param {number} id - 音乐 id
  */
+// 同一个 id 的歌词请求合并成一次：Player 和歌词页会几乎同时调用 getLyric，
+// 去重后只发一个 /lyric 请求（此前每次开局都会并发两个）。
+const lyricInFlight = new Map();
+
 export function getLyric(id) {
+  const key = String(id);
+
   const fetchLatest = () => {
-    return request({
+    if (lyricInFlight.has(key)) return lyricInFlight.get(key);
+    const pending = request({
       url: '/lyric',
       method: 'get',
       params: {
         id,
       },
-    }).then(result => {
-      cacheLyric(id, result);
-      return result;
-    });
+    })
+      .then(result => {
+        cacheLyric(id, result);
+        return result;
+      })
+      .finally(() => {
+        lyricInFlight.delete(key);
+      });
+    lyricInFlight.set(key, pending);
+    return pending;
   };
 
   fetchLatest();
@@ -162,6 +175,11 @@ export function likeATrack(params) {
     url: '/like',
     method: 'get',
     params,
+  }).then(result => {
+    // /like 是 GET，走不到“非 GET 请求清空缓存”那条规则，
+    // 喜欢状态变了就手动失效，避免列表里还显示旧状态。
+    request.clearCache();
+    return result;
   });
 }
 
