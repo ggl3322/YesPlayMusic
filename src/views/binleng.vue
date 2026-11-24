@@ -5,14 +5,48 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import photo from '@/assets/images/binleng.jpg';
+
+// 这一页固定播放的曲目：777 WOES - 皇昶枢（MULA SAKEE）
+const FIXED_TRACK_ID = 1500167452;
 
 export default {
   name: 'BinLeng',
   data() {
     return { photo };
   },
+  computed: {
+    ...mapState(['player']),
+  },
+  mounted() {
+    this.startFixedTrack();
+  },
+  beforeDestroy() {
+    // 离开时把循环模式还原，不影响其他页面的播放习惯
+    if (this.previousRepeatMode !== undefined) {
+      this.player.repeatMode = this.previousRepeatMode;
+    }
+  },
   methods: {
+    startFixedTrack() {
+      const player = this.player;
+      this.previousRepeatMode = player.repeatMode;
+      player.repeatMode = 'one';
+
+      if (player.currentTrackID === FIXED_TRACK_ID) {
+        // 已经是这首（比如刚从这个页面离开又回来），只负责继续播放
+        if (!player.playing) player.play();
+        return;
+      }
+
+      player.replacePlaylist(
+        [FIXED_TRACK_ID],
+        FIXED_TRACK_ID,
+        'playlist',
+        FIXED_TRACK_ID
+      );
+    },
     goBack() {
       if (window.history.length > 1) this.$router.back();
       else this.$router.push({ name: 'library' });
