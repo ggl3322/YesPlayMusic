@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import photo from '@/assets/images/binleng-heart.jpg';
+import photo from '@/assets/images/binleng.jpg';
 
 export default {
   name: 'BinLeng',
