@@ -80,6 +80,7 @@ export default {
   background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 12px 16px -8px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.08);
+  -webkit-backdrop-filter: blur(12px) opacity(1);
   backdrop-filter: blur(12px) opacity(1);
   padding: 24px 0;
   border-radius: 12px;
@@ -90,6 +91,7 @@ export default {
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 128px - 64px);
+  max-height: calc(100dvh - 128px - 64px);
 
   ::-webkit-scrollbar {
     width: 4px;

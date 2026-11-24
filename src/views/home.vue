@@ -85,7 +85,10 @@ export default {
   components: { CoverRow, FMCard, DailyTracksCard },
   data() {
     return {
-      show: false,
+      // 原来这里是 false，整页要等 /personalized 返回后才 v-show 出来，
+      // 冷启动时会白屏好几秒。改成一开始就渲染骨架（标题 + 空行），
+      // 数据回来后再填充封面，体感上"立刻有页面"。
+      show: true,
       recommendPlaylist: { items: [] },
       newReleasesAlbum: { items: [] },
       topList: {

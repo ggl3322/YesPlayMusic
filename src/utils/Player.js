@@ -258,14 +258,27 @@ export default class {
     // 同步播放进度
     // TODO: 如果 _progress 在别的地方被改变了，
     // 这个定时器会覆盖之前改变的值，是bug
+    let persistTick = 0;
     setInterval(() => {
       if (this._howler === null) return;
       this._progress = this._howler.seek();
-      localStorage.setItem('playerCurrentTrackTime', this._progress);
+      // localStorage 是同步写，iOS 上每秒写一次会打断主线程、影响滚动与动画。
+      // 改成每 5 秒落盘一次，退出时再补一次，播放位置一样能恢复。
+      if (++persistTick >= 5) {
+        persistTick = 0;
+        localStorage.setItem('playerCurrentTrackTime', this._progress);
+      }
       if (isCreateMpris) {
         ipcRenderer?.send('playerCurrentTrackTime', this._progress);
       }
     }, 1000);
+
+    // 页面被隐藏/关闭前补写一次，避免丢掉最后几秒的进度
+    window.addEventListener('pagehide', () => {
+      if (this._howler) {
+        localStorage.setItem('playerCurrentTrackTime', this._howler.seek());
+      }
+    });
   }
   _getNextTrack() {
     const next = this._reversed ? this.current - 1 : this.current + 1;

@@ -595,6 +595,7 @@ h1 {
 .section-two {
   margin-top: 54px;
   min-height: calc(100vh - 182px);
+  min-height: calc(100dvh - 182px);
 }
 
 .tabs-row {

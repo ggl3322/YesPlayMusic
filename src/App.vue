@@ -86,8 +86,12 @@ import Player from './components/Player.vue';
 import Toast from './components/Toast.vue';
 import { ipcRenderer } from './electron/ipcRenderer';
 import { isAccountLoggedIn, isLooseLoggedIn } from '@/utils/auth';
-import Lyrics from './views/lyrics.vue';
 import { mapState } from 'vuex';
+
+// 歌词页体积不小（还带着取色库），只有点了「歌词」才会用到，
+// 改成异步组件，让它从首屏包里移出去。
+const Lyrics = () =>
+  import(/* webpackChunkName: "view-lyrics" */ '@/views/lyrics.vue');
 
 const PIN_CODE = '0725';
 const PIN_STORAGE_KEY = 'yesplaymusic-pin-unlocked';
@@ -282,7 +286,9 @@ export default {
 <style lang="scss">
 #app {
   width: 100%;
-  transition: all 0.4s;
+  /* 原来这里是 transition: all 0.4s，切换主题时会把根节点上所有可动画属性
+     都过一遍，移动端会有明显掉帧；实际只会变背景色和文字色。 */
+  transition: background-color 0.4s, color 0.4s;
 }
 
 #app .user-select-none {
@@ -299,6 +305,9 @@ main {
   padding: 64px 10vw 96px 10vw;
   box-sizing: border-box;
   scrollbar-width: none; /* firefox */
+  /* 滚动到顶/底时不再把整页一起拖动（iOS 回弹会串到外层） */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 1336px) {

@@ -71,6 +71,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: calc(100vh - 192px);
+  height: calc(100dvh - 192px);
 }
 
 .section-1 {

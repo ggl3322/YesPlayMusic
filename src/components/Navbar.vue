@@ -215,6 +215,7 @@ nav {
   padding: 0 10vw;
   -webkit-app-region: drag;
   background-color: var(--color-navbar-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   z-index: 100;
 }
@@ -331,6 +332,7 @@ nav.has-custom-titlebar {
   padding: 6px;
   border-radius: 12px;
   background-color: var(--color-navbar-bg);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   z-index: 101;

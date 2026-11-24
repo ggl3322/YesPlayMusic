@@ -130,6 +130,7 @@ img {
 }
 
 .play-button {
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: white;

@@ -1,38 +1,32 @@
 @font-face {
   font-family: 'Barlow';
   font-weight: normal;
-  src: url('~@/assets/fonts/Barlow-Regular.woff2') format('woff2'),
-    url('~@/assets/fonts/Barlow-Regular.ttf') format('truetype');
+  src: url('~@/assets/fonts/Barlow-Regular.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Barlow';
   font-weight: medium;
-  src: url('~@/assets/fonts/Barlow-Medium.woff2') format('woff2'),
-    url('~@/assets/fonts/Barlow-Medium.ttf') format('truetype');
+  src: url('~@/assets/fonts/Barlow-Medium.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Barlow';
   font-weight: 600;
-  src: url('~@/assets/fonts/Barlow-SemiBold.woff2') format('woff2'),
-    url('~@/assets/fonts/Barlow-SemiBold.ttf') format('truetype');
+  src: url('~@/assets/fonts/Barlow-SemiBold.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Barlow';
   font-weight: bold;
-  src: url('~@/assets/fonts/Barlow-Bold.woff2') format('woff2'),
-    url('~@/assets/fonts/Barlow-Bold.ttf') format('truetype');
+  src: url('~@/assets/fonts/Barlow-Bold.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Barlow';
   font-weight: 800;
-  src: url('~@/assets/fonts/Barlow-ExtraBold.woff2') format('woff2'),
-    url('~@/assets/fonts/Barlow-ExtraBold.ttf') format('truetype');
+  src: url('~@/assets/fonts/Barlow-ExtraBold.woff2') format('woff2');
 }
 @font-face {
   font-family: 'Barlow';
   font-weight: 900;
-  src: url('~@/assets/fonts/Barlow-Black.woff2') format('woff2'),
-    url('~@/assets/fonts/Barlow-Black.ttf') format('truetype');
+  src: url('~@/assets/fonts/Barlow-Black.woff2') format('woff2');
 }
 
 :root {
@@ -400,5 +394,37 @@ a {
   }
   .lyrics-page .lyrics-container {
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ---------- 移动端 / Safari 基础适配（本轮优化新增） ---------- */
+html {
+  /* iOS 横屏时禁止自动放大字号 */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  /* 点按按钮/链接时不再闪一下灰色高亮 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 可点区域去掉点按延迟，滚动更跟手 */
+button,
+[role='button'],
+a,
+label {
+  touch-action: manipulation;
+}
+
+/* 尊重系统「减弱动态效果」：动画/过渡几乎瞬时完成 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

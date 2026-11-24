@@ -126,6 +126,7 @@ img {
   justify-content: center;
   align-items: center;
   color: white;
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.08);

@@ -26,6 +26,7 @@ export default {
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 6px 12px -4px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.06);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-radius: 8px;
   box-sizing: border-box;
@@ -36,6 +37,7 @@ export default {
 [data-theme='dark'] {
   .toast {
     background: rgba(46, 46, 46, 0.68);
+    -webkit-backdrop-filter: blur(16px) contrast(120%);
     backdrop-filter: blur(16px) contrast(120%);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }

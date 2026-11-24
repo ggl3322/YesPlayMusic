@@ -178,6 +178,7 @@ export default {
   background: transparent;
   overflow: hidden;
   max-height: 100vh;
+  max-height: 100dvh;
 }
 
 .video-info {

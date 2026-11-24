@@ -61,6 +61,16 @@ export default {
 
   methods: {
     handleScroll() {
+      // iOS 上滚动事件会非常密集，这里把计算合并到每个动画帧只做一次，
+      // 避免一帧内多次同步读取布局（clientHeight/scrollHeight）并触发重渲染，
+      // 滚动时的掉帧明显减少。
+      if (this.scrollRaf) return;
+      this.scrollRaf = requestAnimationFrame(() => {
+        this.scrollRaf = null;
+        this.applyScroll();
+      });
+    },
+    applyScroll() {
       const clintHeight = this.main.clientHeight - 128;
       const scrollHeight = this.main.scrollHeight - 128;
       const scrollTop = this.main.scrollTop;
@@ -71,8 +81,9 @@ export default {
       if (top > clintHeight - thumbHeight) {
         top = clintHeight - thumbHeight;
       }
-      this.top = top;
-      this.thumbHeight = thumbHeight;
+      // 值没变就不要触发响应式更新
+      if (this.top !== top) this.top = top;
+      if (this.thumbHeight !== thumbHeight) this.thumbHeight = thumbHeight;
 
       if (!this.show && clintHeight !== thumbHeight) this.show = true;
       this.setScrollbarHideTimeout();

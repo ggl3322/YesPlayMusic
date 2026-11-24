@@ -29,9 +29,35 @@ module.exports = {
     manifestOptions: {
       background_color: '#000000',
     },
-    // workboxOptions: {
-    //   swSrc: "dev/sw.js",
-    // },
+    // 运行时缓存：封面图和字体走 CacheFirst，二次打开不再下载。
+    // 注意跨域图片是 opaque 响应（status 0），必须放行 statuses [0, 200]。
+    workboxOptions: {
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/[pm]\d+\.music\.126\.net\//,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'netease-images',
+            expiration: {
+              maxEntries: 600,
+              maxAgeSeconds: 30 * 24 * 60 * 60,
+            },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+        {
+          urlPattern: /\.(?:woff2|woff|ttf|otf)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'app-fonts',
+            expiration: {
+              maxEntries: 30,
+              maxAgeSeconds: 365 * 24 * 60 * 60,
+            },
+          },
+        },
+      ],
+    },
   },
   pages: {
     index: {
@@ -73,13 +99,11 @@ module.exports = {
       .options({ target: 'es2015', format: 'cjs' })
       .end();
 
-    // LimitChunkCountPlugin 可以通过合并块来对块进行后期处理。用以解决 chunk 包太多的问题
-    config.plugin('chunkPlugin').use(webpack.optimize.LimitChunkCountPlugin, [
-      {
-        maxChunks: 3,
-        minChunkSize: 10_000,
-      },
-    ]);
+    // 原来的 LimitChunkCountPlugin({ maxChunks: 3 }) 会把 19 个路由 chunk
+    // 强行合并成一个约 400KB 的文件，再被浏览器一次性下载并解析，
+    // 等于首屏把「设置页 / 歌词页」这些用不到的代码也加载了。
+    // 去掉后恢复按路由懒加载：首屏只加载 vendor + index，
+    // 其余页面由 webpack 的 prefetch 在空闲时低优先级补齐，切页基本无感。
   },
   // 添加插件的配置
   pluginOptions: {
