@@ -144,6 +144,7 @@ export default {
           'library',
           'liked',
           'settings',
+          'binleng',
         ].includes(this.$route.name) && this.$route.query.id !== 'to_be_played'
       );
     },

@@ -69,6 +69,12 @@
           @click.native="closeNavMenu"
           >{{ $t('nav.explore') }}</router-link
         >
+        <router-link
+          :to="{ name: 'binleng' }"
+          :class="{ active: $route.name === 'binleng' }"
+          @click.native="closeNavMenu"
+          >彬冷的心</router-link
+        >
       </div>
     </nav>
 

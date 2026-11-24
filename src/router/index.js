@@ -24,6 +24,11 @@ const routes = [
     },
   },
   {
+    path: '/binleng',
+    name: 'binleng',
+    component: () => import('@/views/binleng.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@/views/login.vue'),
